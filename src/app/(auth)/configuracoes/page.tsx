@@ -39,7 +39,6 @@ import {
 } from "@/components/ui/alert-dialog";
 import {
   MODULES,
-  useSettingsStore,
   type AccessGroup,
   type ActionKey,
   type ModuleKey,
