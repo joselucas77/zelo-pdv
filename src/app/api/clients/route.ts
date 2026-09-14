@@ -1,0 +1,82 @@
+import { NextRequest, NextResponse } from "next/server";
+import prisma from "@/lib/prisma";
+import { getCurrentUser } from "@/lib/auth";
+
+// [GET] /api/clients - Lista todos os clientes com seus endereços
+export async function GET() {
+  try {
+    const user = await getCurrentUser();
+    if (!user) return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
+
+    const clients = await prisma.client.findMany({
+      where: { lojaId: user.lojaId },
+      include: {
+        address: true, // Inclui o endereço relacionado
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
+    return NextResponse.json(clients);
+  } catch (error) {
+    console.error("Erro ao buscar clientes:", error);
+    return NextResponse.json(
+      { error: "Erro interno ao buscar clientes." },
+      { status: 500 },
+    );
+  }
+}
+
+// [POST] /api/clients - Cria um novo cliente com endereço
+export async function POST(req: NextRequest) {
+  try {
+    const body = await req.json();
+    const { name, phone, email, notes, address } = body;
+
+    if (!name || !phone) {
+      return NextResponse.json(
+        { error: "Nome e telefone são obrigatórios." },
+        { status: 400 },
+      );
+    }
+
+    const user = await getCurrentUser();
+    if (!user) return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
+
+    const newClient = await prisma.client.create({
+      data: {
+        name,
+        phone,
+        email,
+        notes,
+        lojaId: user.lojaId,
+        address: address
+          ? {
+              create: {
+                street: address.street || "",
+                number: address.number || "",
+                complement: address.complement || "",
+                neighborhood: address.neighborhood || "",
+                city: address.city || "",
+                state: address.state || "",
+                zipCode: address.zipCode || "",
+                lojaId: user.lojaId,
+              },
+            }
+          : undefined,
+      },
+      include: {
+        address: true,
+      },
+    });
+
+    return NextResponse.json(newClient, { status: 201 });
+  } catch (error) {
+    console.error("Erro ao criar cliente:", error);
+    return NextResponse.json(
+      { error: "Erro interno ao criar cliente." },
+      { status: 500 },
+    );
+  }
+}

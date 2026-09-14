@@ -1,0 +1,200 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import {
+  type ColumnDef,
+  type ColumnFiltersState,
+  flexRender,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  useReactTable,
+} from "@tanstack/react-table";
+import { ChevronLeft, ChevronRight, Search } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import type { Sale } from "@/types";
+
+export function SalesDataTable({
+  columns,
+  data,
+}: {
+  columns: ColumnDef<Sale>[];
+  data: Sale[];
+}) {
+  const [globalFilter, setGlobalFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string | null>("Todas");
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+
+  const table = useReactTable({
+    data,
+    columns,
+    state: { globalFilter, columnFilters },
+    onGlobalFilterChange: setGlobalFilter,
+    onColumnFiltersChange: setColumnFilters,
+    globalFilterFn: (row, _id, value) => {
+      const term = String(value).trim().toLowerCase();
+      if (!term) return true;
+      return row.original.clientName.toLowerCase().includes(term);
+    },
+    getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    initialState: { pagination: { pageSize: 8 } },
+  });
+
+  useEffect(() => {
+    table.setPageIndex(0);
+  }, [globalFilter, statusFilter, table]);
+
+  // Sincroniza o Select com o Filtro da Coluna
+  useEffect(() => {
+    table
+      .getColumn("status")
+      ?.setFilterValue(statusFilter === "Todas" ? undefined : statusFilter);
+  }, [statusFilter, table]);
+
+  const rows = table.getRowModel().rows;
+  const totalFiltered = table.getFilteredRowModel().rows.length;
+  const pageIndex = table.getState().pagination.pageIndex;
+  const pageSize = table.getState().pagination.pageSize;
+
+  return (
+    <div>
+      <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center">
+        <div className="relative flex-1 max-w-md">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            placeholder="Buscar por cliente..."
+            value={globalFilter}
+            onChange={(e) => setGlobalFilter(e.target.value)}
+            className="rounded-xl pl-9"
+          />
+        </div>
+        <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <SelectTrigger className="w-full rounded-xl sm:w-44">
+            <SelectValue placeholder="Filtrar status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="Todas">Todas</SelectItem>
+            <SelectItem value="paid">Pagas</SelectItem>
+            <SelectItem value="pending">Pendentes</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <Card className="border-border/70 p-0">
+        <CardContent className="p-0">
+          <div className="w-full overflow-x-auto">
+            <Table>
+              <TableHeader>
+                {table.getHeaderGroups().map((hg) => (
+                  <TableRow key={hg.id}>
+                    {hg.headers.map((header) => (
+                      <TableHead
+                        key={header.id}
+                        className={
+                          header.column.id === "clientName" ||
+                          header.column.id === "actions"
+                            ? undefined
+                            : "hidden sm:table-cell"
+                        }
+                      >
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(
+                              header.column.columnDef.header,
+                              header.getContext(),
+                            )}
+                      </TableHead>
+                    ))}
+                  </TableRow>
+                ))}
+              </TableHeader>
+              <TableBody>
+                {rows.length ? (
+                  rows.map((row) => (
+                    <TableRow key={row.id}>
+                      {row.getVisibleCells().map((cell) => (
+                        <TableCell
+                          key={cell.id}
+                          className={
+                            cell.column.id === "clientName" ||
+                            cell.column.id === "actions"
+                              ? undefined
+                              : "hidden sm:table-cell"
+                          }
+                        >
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext(),
+                          )}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell
+                      colSpan={columns.length}
+                      className="h-24 text-center text-sm text-muted-foreground"
+                    >
+                      Nenhuma venda encontrada.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
+
+      <div className="mt-4 flex items-center justify-between gap-2">
+        <div className="text-xs text-muted-foreground">
+          {totalFiltered === 0 ? 0 : pageIndex * pageSize + 1}–
+          {Math.min((pageIndex + 1) * pageSize, totalFiltered)} de{" "}
+          {totalFiltered}
+        </div>
+        <div className="flex items-center gap-2">
+          <Button
+            size="icon"
+            variant="outline"
+            className="h-8 w-8"
+            disabled={!table.getCanPreviousPage()}
+            onClick={() => table.previousPage()}
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <div className="text-xs tabular-nums text-muted-foreground">
+            {pageIndex + 1} / {table.getPageCount() || 1}
+          </div>
+          <Button
+            size="icon"
+            variant="outline"
+            className="h-8 w-8"
+            disabled={!table.getCanNextPage()}
+            onClick={() => table.nextPage()}
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}

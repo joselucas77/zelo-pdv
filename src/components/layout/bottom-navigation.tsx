@@ -1,0 +1,56 @@
+"use client";
+
+import { usePathname } from "next/navigation";
+import Link from "next/link";
+import { cn } from "@/lib/utils";
+import { NAV } from "@/lib/navigation-data";
+
+export function BottomNavigation() {
+  const pathname = usePathname();
+
+  const isActive = (to: string) =>
+    to === "/" ? pathname === "/" : pathname.startsWith(to);
+
+  return (
+    <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/80 backdrop-blur-lg md:hidden">
+      <div className="mx-auto grid max-w-lg grid-cols-5 pb-[max(env(safe-area-inset-bottom),0.25rem)] pt-1">
+        {NAV.map((n) => {
+          const Icon = n.icon;
+          const active = isActive(n.to);
+          if (n.primary) {
+            return (
+              <Link
+                key={n.to}
+                href={n.to}
+                className="relative flex items-center justify-center"
+                aria-label={n.label}
+              >
+                <span
+                  className={cn(
+                    "-mt-6 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/30 transition-transform active:scale-95",
+                    active && "ring-4 ring-primary/20",
+                  )}
+                >
+                  <Icon className="h-6 w-6" />
+                </span>
+              </Link>
+            );
+          }
+          return (
+            <Link
+              key={n.to}
+              href={n.to}
+              className={cn(
+                "flex flex-col items-center gap-0.5 py-1.5 text-[11px] font-medium transition-colors",
+                active ? "text-primary" : "text-muted-foreground",
+              )}
+            >
+              <Icon className="h-5 w-5" />
+              {n.short}
+            </Link>
+          );
+        })}
+      </div>
+    </nav>
+  );
+}
