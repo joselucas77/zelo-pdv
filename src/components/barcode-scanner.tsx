@@ -41,9 +41,11 @@ export function BarcodeScanner({
           qrbox: { width: 250, height: 150 },
         },
         (decodedText) => {
-          onScan(decodedText);
-          stopScan();
-          onOpenChange(false);
+          if (decodedText && decodedText.trim() !== "") {
+            onScan(decodedText);
+            stopScan();
+            onOpenChange(false);
+          }
         },
         (errorMessage) => {
           // Ignore parsing errors as they fire constantly when no code is present
@@ -51,9 +53,7 @@ export function BarcodeScanner({
       );
       setIsScanning(true);
     } catch (err) {
-      setError(
-        "Nenhuma câmera traseira encontrada ou sem permissão de acesso.",
-      );
+      setError("Nenhuma câmera traseira encontrada ou permissão negada.");
       setIsScanning(false);
     }
   };
@@ -89,7 +89,13 @@ export function BarcodeScanner({
   }, []);
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog
+      open={open}
+      onOpenChange={(o) => {
+        // Impede fechamento ao clicar fora do modal (útil por causa do prompt de permissão da câmera)
+        if (o) onOpenChange(o);
+      }}
+    >
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Ler Código de Barras</DialogTitle>
@@ -105,17 +111,14 @@ export function BarcodeScanner({
             </p>
           )}
 
-          <div
-            className={`w-full max-w-sm overflow-hidden rounded-lg bg-black ${
-              isScanning ? "block" : "hidden"
-            }`}
-          >
-            <div id="reader" className="w-full"></div>
+          <div className="w-full min-h-[250px] max-w-sm relative overflow-hidden rounded-lg bg-black flex items-center justify-center">
+            {!isScanning && !error && (
+              <p className="text-sm text-muted-foreground absolute z-10">
+                Iniciando câmera...
+              </p>
+            )}
+            <div id="reader" className="w-full relative z-20"></div>
           </div>
-
-          {!isScanning && !error && (
-            <p className="text-sm text-muted-foreground">Iniciando câmera...</p>
-          )}
         </div>
 
         <div className="flex justify-end w-full mt-2">
