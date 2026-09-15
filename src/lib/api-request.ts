@@ -16,10 +16,15 @@ export async function apiRequest<T>(
     let errorMessage = "Erro ao comunicar com o servidor.";
     try {
       const errorData = await response.json();
-      if (errorData && errorData.error) {
-        errorMessage = errorData.error;
-      } else if (errorData && errorData.message) {
-        errorMessage = errorData.message;
+      if (errorData) {
+        if (errorData.error) {
+          errorMessage = errorData.error;
+        } else if (errorData.message) {
+          errorMessage = errorData.message;
+        }
+        if (errorData.details) {
+          errorMessage += `\nDetalhes: ${errorData.details}`;
+        }
       }
     } catch {
       // Falha ao fazer parse do JSON, mantem o erro padrão

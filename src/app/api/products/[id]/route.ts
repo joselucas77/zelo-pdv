@@ -62,9 +62,26 @@ export async function PATCH(
       );
     }
 
+    const toNull = (v?: string | null) =>
+      v === "" || v === undefined ? null : v;
+
+    const normalizedData = {
+      ...data,
+      ...(data.code !== undefined && { code: toNull(data.code) }),
+      ...(data.barcode !== undefined && { barcode: toNull(data.barcode) }),
+      ...(data.description !== undefined && {
+        description: toNull(data.description),
+      }),
+      ...(data.image !== undefined && { image: toNull(data.image) }),
+      ...(data.notes !== undefined && { notes: toNull(data.notes) }),
+      ...(data.categoryId !== undefined && {
+        categoryId: toNull(data.categoryId),
+      }),
+    };
+
     const product = await prisma.product.update({
       where: { id },
-      data,
+      data: normalizedData,
       include: {
         category: true,
       },

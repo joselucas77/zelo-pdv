@@ -10,17 +10,21 @@ export const categorySchema = z.object({
 export const productSchema = z.object({
   code: z.string().optional().nullable(),
   barcode: z.string().optional().nullable(),
-  name: z.string().min(2, "O nome do produto é obrigatório"),
+  name: z.string().min(2, "O nome do produto deve ter pelo menos 2 caracteres"),
   categoryId: z
     .string()
-    .min(1, "Selecione uma categoria")
-    .optional()
-    .nullable(),
+    .min(1, "A categoria é obrigatória")
+    .nullable()
+    .refine((v) => v !== null && v !== "", {
+      message: "A categoria é obrigatória",
+    }),
   description: z.string().optional().nullable(),
   image: z.string().optional().nullable(),
-  unit: z.string().default("UN"),
-  costPrice: z.coerce.number().min(0, "O preço não pode ser negativo"),
-  salePrice: z.coerce.number().min(0, "O preço não pode ser negativo"),
+  unit: z.string().min(1, "A unidade é obrigatória"),
+  costPrice: z.coerce.number().min(0, "O preço de custo não pode ser negativo"),
+  salePrice: z.coerce
+    .number()
+    .min(0.01, "O preço de venda é obrigatório e deve ser maior que zero"),
   stock: z.coerce.number().min(0, "O estoque não pode ser negativo"),
   minStock: z.coerce.number().min(0, "O estoque mínimo não pode ser negativo"),
   notes: z.string().optional().nullable(),

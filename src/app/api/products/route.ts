@@ -45,9 +45,18 @@ export async function POST(request: Request) {
     const body = await request.json();
     const data = productSchema.parse(body);
 
+    const toNull = (v?: string | null) =>
+      v === "" || v === undefined ? null : v;
+
     const product = await prisma.product.create({
       data: {
         ...data,
+        code: toNull(data.code),
+        barcode: toNull(data.barcode),
+        description: toNull(data.description),
+        image: toNull(data.image),
+        notes: toNull(data.notes),
+        categoryId: toNull(data.categoryId),
         costPrice: data.costPrice,
         salePrice: data.salePrice,
         lojaId: auth.user.lojaId,
@@ -66,20 +75,36 @@ export async function POST(request: Request) {
       { status: 201 },
     );
   } catch (error: any) {
-    if (error.name === "ZodError") {
+    if (error && (error.name === "ZodError" || error.issues)) {
+      const issueDetails = error.issues
+        ?.map((i: any) => `${i.path.join(".")}: ${i.message}`)
+        .join(", ");
       return NextResponse.json(
-        { error: "Dados inválidos: " + error.issues[0].message },
+        {
+          error: "Dados inválidos.",
+          details: issueDetails || "Erro de validação nos campos informados.",
+        },
         { status: 400 },
       );
     }
-    if (error.code === "P2002" && error.meta?.target?.includes("code")) {
+    if (error.code === "P2002") {
+      const target = error.meta?.target || "campo";
       return NextResponse.json(
-        { error: "Já existe um produto com este código (SKU)." },
+        {
+          error: "Conflito de dados: Este registro já existe.",
+          details: `Os campos restritos que geraram o erro foram: ${target}`,
+        },
         { status: 400 },
       );
     }
+
+    console.error("DETALHES DO ERRO AO CRIAR PRODUTO:", error);
+
     return NextResponse.json(
-      { error: "Erro ao criar produto." },
+      {
+        error: "Erro ao criar produto.",
+        details: error instanceof Error ? error.message : String(error),
+      },
       { status: 500 },
     );
   }

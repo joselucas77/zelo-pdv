@@ -315,6 +315,19 @@ function StockEntry({
   onSuccess: (product: ProductFrontend) => void;
 }) {
   const [qty, setQty] = useState(1);
+  const [rawQty, setRawQty] = useState("1");
+
+  const handleQtyChange = (value: string) => {
+    // Remove zeros iniciais (ex: "01" → "1")
+    const cleaned = value.replace(/^0+(\d)/, "$1");
+    setRawQty(cleaned);
+    const num = parseInt(cleaned, 10);
+    if (!isNaN(num) && num > 0) {
+      setQty(num);
+    } else {
+      setQty(0);
+    }
+  };
 
   return (
     <Dialog open={!!product} onOpenChange={(open) => !open && onClose()}>
@@ -336,10 +349,10 @@ function StockEntry({
               <Label>Quantidade a adicionar</Label>
 
               <Input
-                type="number"
-                min={1}
-                value={qty}
-                onChange={(e) => setQty(Number(e.target.value))}
+                inputMode="numeric"
+                value={rawQty}
+                onChange={(e) => handleQtyChange(e.target.value)}
+                onFocus={(e) => e.target.select()}
               />
             </div>
           </div>
@@ -351,6 +364,7 @@ function StockEntry({
           </Button>
 
           <Button
+            disabled={qty <= 0}
             onClick={async () => {
               if (!product || qty <= 0) return;
 
@@ -365,6 +379,7 @@ function StockEntry({
                 toast.success(`+${qty} un adicionados`);
 
                 setQty(1);
+                setRawQty("1");
                 onClose();
               } catch (error) {
                 const message =
@@ -404,17 +419,45 @@ function ProductForm({
   const isMobile = useIsMobile();
   const [form, setForm] = useState<FormState>(initial);
   const [busy, setBusy] = useState(false);
+  // Guardamos os valores dos campos numéricos como string durante a digitação
+  const [rawValues, setRawValues] = useState<Record<string, string>>({
+    costPrice: initial.costPrice === 0 ? "" : String(initial.costPrice),
+    salePrice: initial.salePrice === 0 ? "" : String(initial.salePrice),
+    stock: initial.stock === 0 ? "" : String(initial.stock),
+    minStock: initial.minStock === 0 ? "" : String(initial.minStock),
+  });
 
   const [isScannerOpen, setIsScannerOpen] = useState(false);
 
-  // Atualização segura para aceitar string temporariamente no input e converter para número
-  const updateNumber = (k: keyof FormState, v: string) => {
-    const num = v === "" ? 0 : Number(v);
-    setForm((f) => ({ ...f, [k]: isNaN(num) ? 0 : num }));
-  };
-
+  // Atualiza um campo de texto simples
   const updateString = (k: keyof FormState, v: string) =>
     setForm((f) => ({ ...f, [k]: v }));
+
+  // Para campos numéricos: mantém o rawValue durante digitação e só commita um número válido
+  const handleNumericChange = (k: keyof FormState, raw: string) => {
+    // Aceita vírgula e ponto como separador decimal, normaliza para ponto
+    const normalized = raw.replace(",", ".");
+    setRawValues((prev) => ({ ...prev, [k]: raw }));
+    const num = parseFloat(normalized);
+    if (!isNaN(num) && num >= 0) {
+      setForm((f) => ({ ...f, [k]: num }));
+    } else if (normalized === "" || normalized === "." || normalized === ",") {
+      setForm((f) => ({ ...f, [k]: 0 }));
+    }
+  };
+
+  // Ao sair do campo (onBlur), formata o valor
+  const handleNumericBlur = (k: keyof FormState) => {
+    const num = form[k] as number;
+    setRawValues((prev) => ({ ...prev, [k]: num === 0 ? "" : String(num) }));
+  };
+
+  // Validação dos campos obrigatórios
+  const canSave =
+    form.name.trim().length >= 2 &&
+    form.categoryId.trim() !== "" &&
+    form.unit.trim() !== "" &&
+    (form.salePrice as number) > 0;
 
   const requiredInputClass =
     "border-primary/50 focus:ring-primary/50 bg-primary/[0.03]";
@@ -427,6 +470,7 @@ function ProductForm({
           className={requiredInputClass}
           value={form.name}
           onChange={(e) => updateString("name", e.target.value)}
+          placeholder="Nome do produto"
         />
       </div>
 
@@ -480,7 +524,7 @@ function ProductForm({
       </div>
 
       <div className="sm:col-span-2 space-y-2">
-        <Label>URL da Imagem (Opcional)</Label>
+        <Label>URL da Imagem</Label>
         <Input
           value={form.image}
           onChange={(e) => updateString("image", e.target.value)}
@@ -510,44 +554,50 @@ function ProductForm({
       </div>
 
       <div className="sm:col-span-2 space-y-2">
-        <Label>Estoque atual</Label>
-        <Input
-          type="number"
-          value={form.stock === 0 ? "" : form.stock}
-          onChange={(e) => updateNumber("stock", e.target.value)}
-          placeholder="0"
-        />
-      </div>
-      <div className="sm:col-span-2 space-y-2">
-        <Label>Preço de custo</Label>
-        <Input
-          type="number"
-          step="0.01"
-          value={form.costPrice === 0 ? "" : form.costPrice}
-          onChange={(e) => updateNumber("costPrice", e.target.value)}
-          placeholder="0.00"
-        />
-      </div>
-      <div className="sm:col-span-2 space-y-2">
         <Label>Preço de venda</Label>
         <Input
           className={requiredInputClass}
-          type="number"
-          step="0.01"
-          value={form.salePrice === 0 ? "" : form.salePrice}
-          onChange={(e) => updateNumber("salePrice", e.target.value)}
-          placeholder="0.00"
+          inputMode="decimal"
+          value={rawValues.salePrice}
+          onChange={(e) => handleNumericChange("salePrice", e.target.value)}
+          onBlur={() => handleNumericBlur("salePrice")}
+          placeholder="0,00"
         />
       </div>
+
       <div className="sm:col-span-2 space-y-2">
-        <Label>Estoque mínimo</Label>
+        <Label>Preço de custo</Label>
         <Input
-          type="number"
-          value={form.minStock === 0 ? "" : form.minStock}
-          onChange={(e) => updateNumber("minStock", e.target.value)}
+          inputMode="decimal"
+          value={rawValues.costPrice}
+          onChange={(e) => handleNumericChange("costPrice", e.target.value)}
+          onBlur={() => handleNumericBlur("costPrice")}
+          placeholder="0,00"
+        />
+      </div>
+
+      <div className="sm:col-span-2 space-y-2">
+        <Label>Estoque atual</Label>
+        <Input
+          inputMode="decimal"
+          value={rawValues.stock}
+          onChange={(e) => handleNumericChange("stock", e.target.value)}
+          onBlur={() => handleNumericBlur("stock")}
           placeholder="0"
         />
       </div>
+
+      <div className="sm:col-span-2 space-y-2">
+        <Label>Estoque mínimo</Label>
+        <Input
+          inputMode="decimal"
+          value={rawValues.minStock}
+          onChange={(e) => handleNumericChange("minStock", e.target.value)}
+          onBlur={() => handleNumericBlur("minStock")}
+          placeholder="0"
+        />
+      </div>
+
       <div className="sm:col-span-2 space-y-2">
         <Label>Descrição</Label>
         <Textarea
@@ -573,7 +623,7 @@ function ProductForm({
         Cancelar
       </Button>
       <Button
-        disabled={busy || !form.name.trim() || !form.categoryId}
+        disabled={busy || !canSave}
         onClick={async () => {
           setBusy(true);
           try {
