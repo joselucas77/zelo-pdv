@@ -865,7 +865,7 @@ function ProductsConfigSection() {
           <div className="grid md:grid-cols-2 gap-6">
             {/* Categorias */}
 
-            <div className="border rounded-md p-4 flex flex-col h-[400px]">
+            <div className="border rounded-md p-4 flex flex-col h-100">
               <div className="flex justify-between items-center mb-4 shrink-0">
                 <h3 className="font-semibold text-lg">Categorias</h3>
 
@@ -920,7 +920,7 @@ function ProductsConfigSection() {
 
             {/* Unidades */}
 
-            <div className="border rounded-md p-4 flex flex-col h-[400px]">
+            <div className="border rounded-md p-4 flex flex-col h-100">
               <div className="flex justify-between items-center mb-4 shrink-0">
                 <h3 className="font-semibold text-lg">Unidades de Medida</h3>
 

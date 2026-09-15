@@ -44,8 +44,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Category } from "@/prisma/client";
-import { Loader2 } from "lucide-react";
+import { Loader2, ScanBarcode } from "lucide-react";
 import { usePermissions } from "@/components/auth/permissions-provider";
+import { BarcodeScanner } from "@/components/barcode-scanner";
 
 // 1. Estado do Formulário usa NUMBER agora, compatível com frontend
 export type FormState = {
@@ -404,6 +405,8 @@ function ProductForm({
   const [form, setForm] = useState<FormState>(initial);
   const [busy, setBusy] = useState(false);
 
+  const [isScannerOpen, setIsScannerOpen] = useState(false);
+
   // Atualização segura para aceitar string temporariamente no input e converter para número
   const updateNumber = (k: keyof FormState, v: string) => {
     const num = v === "" ? 0 : Number(v);
@@ -433,10 +436,21 @@ function ProductForm({
 
       <div className="space-y-2">
         <Label>Código de Barras</Label>
-        <Input
-          value={form.barcode}
-          onChange={(e) => updateString("barcode", e.target.value)}
-        />
+        <div className="flex gap-2">
+          <Input
+            value={form.barcode}
+            onChange={(e) => updateString("barcode", e.target.value)}
+          />
+          <Button
+            type="button"
+            variant="outline"
+            size="icon"
+            className="shrink-0"
+            onClick={() => setIsScannerOpen(true)}
+          >
+            <ScanBarcode className="w-4 h-4" />
+          </Button>
+        </div>
       </div>
 
       <div className="space-y-2">
@@ -571,39 +585,53 @@ function ProductForm({
 
   if (isMobile) {
     return (
-      <Drawer open={open} onOpenChange={onOpenChange}>
-        <DrawerContent className="h-screen">
-          <DrawerHeader className="shrink-0 px-4">
-            <DrawerTitle>
-              {isEdit ? "Editar produto" : "Novo produto"}
-            </DrawerTitle>
-          </DrawerHeader>
+      <>
+        <Drawer open={open} onOpenChange={onOpenChange}>
+          <DrawerContent className="h-screen">
+            <DrawerHeader className="shrink-0 px-4">
+              <DrawerTitle>
+                {isEdit ? "Editar produto" : "Novo produto"}
+              </DrawerTitle>
+            </DrawerHeader>
 
-          <div className="flex min-h-0 flex-1 flex-col px-4 pb-6">
-            <ScrollArea className="flex-1 **:data-radix-scroll-area-thumb:hidden">
-              {FormFields}
-            </ScrollArea>
+            <div className="flex min-h-0 flex-1 flex-col px-4 pb-6">
+              <ScrollArea className="flex-1 **:data-radix-scroll-area-thumb:hidden">
+                {FormFields}
+              </ScrollArea>
 
-            <div className="shrink-0 pt-4 border-t border-border">
-              {ActionButtons}
+              <div className="shrink-0 pt-4 border-t border-border">
+                {ActionButtons}
+              </div>
             </div>
-          </div>
-        </DrawerContent>
-      </Drawer>
+          </DrawerContent>
+        </Drawer>
+        <BarcodeScanner
+          open={isScannerOpen}
+          onOpenChange={setIsScannerOpen}
+          onScan={(barcode) => updateString("barcode", barcode)}
+        />
+      </>
     );
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[92vh] overflow-y-auto sm:max-w-lg">
-        <DialogHeader>
-          <DialogTitle>
-            {isEdit ? "Editar produto" : "Novo produto"}
-          </DialogTitle>
-        </DialogHeader>
-        {FormFields}
-        <DialogFooter>{ActionButtons}</DialogFooter>
-      </DialogContent>
-    </Dialog>
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="max-h-[92vh] overflow-y-auto sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>
+              {isEdit ? "Editar produto" : "Novo produto"}
+            </DialogTitle>
+          </DialogHeader>
+          {FormFields}
+          <DialogFooter>{ActionButtons}</DialogFooter>
+        </DialogContent>
+      </Dialog>
+      <BarcodeScanner
+        open={isScannerOpen}
+        onOpenChange={setIsScannerOpen}
+        onScan={(barcode) => updateString("barcode", barcode)}
+      />
+    </>
   );
 }
