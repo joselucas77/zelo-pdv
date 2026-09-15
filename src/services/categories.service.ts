@@ -10,4 +10,15 @@ export const categoriesService = {
       body: JSON.stringify(data),
     });
   },
+  async update(id: string, data: { name: string }) {
+    return apiRequest(`/categories/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    });
+  },
+  async delete(id: string) {
+    return apiRequest(`/categories/${id}`, {
+      method: "DELETE",
+    });
+  },
 };

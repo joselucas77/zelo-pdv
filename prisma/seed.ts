@@ -57,7 +57,50 @@ async function main() {
 
   console.log(`Grupo configurado: ${adminGroup.name} (${adminGroup.id})`);
 
-  // 3. Criar ou atualizar o usuário Admin
+  // 3. Unidades padrão
+  const defaultUnits = [
+    { name: "Unidade", abbreviation: "UN", decimalPlaces: 0 },
+    { name: "Quilo", abbreviation: "KG", decimalPlaces: 3 },
+    { name: "Grama", abbreviation: "G", decimalPlaces: 0 },
+    { name: "Litro", abbreviation: "L", decimalPlaces: 3 },
+    { name: "Caixa", abbreviation: "CX", decimalPlaces: 0 },
+    { name: "Pacote", abbreviation: "PCT", decimalPlaces: 0 },
+  ];
+
+  for (const unit of defaultUnits) {
+    await prisma.unit.upsert({
+      where: {
+        lojaId_abbreviation: {
+          lojaId: loja.id,
+          abbreviation: unit.abbreviation,
+        },
+      },
+      update: {},
+      create: {
+        lojaId: loja.id,
+        name: unit.name,
+        abbreviation: unit.abbreviation,
+        decimalPlaces: unit.decimalPlaces,
+      },
+    });
+  }
+
+  // 4. Categoria Padrão
+  await prisma.category.upsert({
+    where: {
+      lojaId_name: {
+        lojaId: loja.id,
+        name: "Diversos",
+      },
+    },
+    update: {},
+    create: {
+      lojaId: loja.id,
+      name: "Diversos",
+    },
+  });
+
+  // Usuário Admin
   const email = "joselucasa937@gmail.com";
   const password = "2468JLsc";
   const hashedPassword = await bcrypt.hash(password, 10);

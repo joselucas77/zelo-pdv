@@ -36,6 +36,7 @@ model Loja {
   accessGroups AccessGroup[]
   clients      Client[]
   categories   Category[]
+  units        Unit[]
   products     Product[]
   sales        Sale[]
 
@@ -139,6 +140,23 @@ model Client {
   @@index([lojaId])
   @@index([lojaId, updatedAt])
   @@index([lojaId, deletedAt])
+}
+
+model Unit {
+  id           String @id @default(cuid())
+  name         String
+  abbreviation String
+  decimalPlaces Int     @default(0)
+
+  lojaId String
+  loja   Loja   @relation(fields: [lojaId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([lojaId, name])
+  @@unique([lojaId, abbreviation])
+  @@index([lojaId])
 }
 
 model Category {

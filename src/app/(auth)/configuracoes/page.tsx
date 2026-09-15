@@ -14,6 +14,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { usePermissions } from "@/components/auth/permissions-provider";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
@@ -52,11 +61,14 @@ import {
 } from "@/services/accessGroup.service";
 import { createLoja, getLoja, updateLoja } from "@/services/loja.service";
 import { LojaFormData, lojaSchema } from "@/lib/validations/loja";
+import { categoriesService } from "@/services/categories.service";
+import { unitsService, Unit, UnitFormData } from "@/services/units.service";
 
 export default function ConfiguracoesPage() {
   return (
     <div className="w-full px-4">
       <StoreSection />
+      <ProductsConfigSection />
       <GroupsSection />
     </div>
   );
@@ -664,5 +676,414 @@ function GroupForm({
         </DialogFooter>
       </DialogContent>
     </Dialog>
+  );
+}
+
+function ProductsConfigSection() {
+  const [categories, setCategories] = useState<{ id: string; name: string }[]>(
+    [],
+  );
+
+  const [units, setUnits] = useState<Unit[]>([]);
+
+  const [loading, setLoading] = useState(true);
+
+  // States for Category Modal
+
+  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+
+  const [editingCategory, setEditingCategory] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
+
+  const [categoryName, setCategoryName] = useState("");
+
+  // States for Unit Modal
+
+  const [isUnitModalOpen, setIsUnitModalOpen] = useState(false);
+
+  const [editingUnit, setEditingUnit] = useState<Unit | null>(null);
+
+  const [unitForm, setUnitForm] = useState<UnitFormData>({
+    name: "",
+    abbreviation: "",
+    decimalPlaces: 0,
+  });
+
+  const fetchData = async () => {
+    setLoading(true);
+
+    try {
+      const [cats, uns] = await Promise.all([
+        categoriesService.list(),
+        unitsService.getUnits(),
+      ]);
+      setCategories((cats as any[]) || []);
+      setUnits((uns as any[]) || []);
+    } catch (error) {
+      toast.error("Erro ao carregar configurações de produtos.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  // Category Actions
+
+  const handleSaveCategory = async () => {
+    if (!categoryName.trim())
+      return toast.error("O nome da categoria é obrigatório.");
+
+    try {
+      if (editingCategory) {
+        await categoriesService.update(editingCategory.id, {
+          name: categoryName,
+        });
+
+        toast.success("Categoria atualizada!");
+      } else {
+        await categoriesService.create({ name: categoryName });
+
+        toast.success("Categoria criada!");
+      }
+
+      setIsCategoryModalOpen(false);
+
+      fetchData();
+    } catch (error: any) {
+      toast.error(error.message || "Erro ao salvar categoria.");
+    }
+  };
+
+  const handleDeleteCategory = async (id: string) => {
+    if (!confirm("Tem certeza que deseja remover esta categoria?")) return;
+
+    try {
+      await categoriesService.delete(id);
+
+      toast.success("Categoria removida.");
+
+      fetchData();
+    } catch (error: any) {
+      toast.error(error.message || "Erro ao remover categoria.");
+    }
+  };
+
+  const openCategoryModal = (cat?: { id: string; name: string }) => {
+    if (cat) {
+      setEditingCategory(cat);
+
+      setCategoryName(cat.name);
+    } else {
+      setEditingCategory(null);
+
+      setCategoryName("");
+    }
+
+    setIsCategoryModalOpen(true);
+  };
+
+  // Unit Actions
+
+  const handleSaveUnit = async () => {
+    if (!unitForm.name.trim() || !unitForm.abbreviation.trim()) {
+      return toast.error("Nome e sigla são obrigatórios.");
+    }
+
+    try {
+      const payload = {
+        ...unitForm,
+        decimalPlaces: Number(unitForm.decimalPlaces),
+      };
+
+      if (editingUnit) {
+        await unitsService.updateUnit(editingUnit.id, payload);
+
+        toast.success("Unidade atualizada!");
+      } else {
+        await unitsService.createUnit(payload);
+
+        toast.success("Unidade criada!");
+      }
+
+      setIsUnitModalOpen(false);
+
+      fetchData();
+    } catch (error: any) {
+      toast.error(error.message || "Erro ao salvar unidade.");
+    }
+  };
+
+  const handleDeleteUnit = async (id: string) => {
+    if (!confirm("Tem certeza que deseja remover esta unidade?")) return;
+
+    try {
+      await unitsService.deleteUnit(id);
+
+      toast.success("Unidade removida.");
+
+      fetchData();
+    } catch (error: any) {
+      toast.error(error.message || "Erro ao remover unidade.");
+    }
+  };
+
+  const openUnitModal = (u?: Unit) => {
+    if (u) {
+      setEditingUnit(u);
+
+      setUnitForm({
+        name: u.name,
+        abbreviation: u.abbreviation,
+        decimalPlaces: u.decimalPlaces,
+      });
+    } else {
+      setEditingUnit(null);
+
+      setUnitForm({ name: "", abbreviation: "", decimalPlaces: 0 });
+    }
+
+    setIsUnitModalOpen(true);
+  };
+
+  return (
+    <Card className="mb-6">
+      <CardHeader>
+        <CardTitle className="text-xl font-semibold flex items-center gap-2">
+          Configurações de Produtos
+        </CardTitle>
+      </CardHeader>
+
+      <CardContent className="space-y-6">
+        {loading ? (
+          <p className="text-sm text-muted-foreground">Carregando...</p>
+        ) : (
+          <div className="grid md:grid-cols-2 gap-6">
+            {/* Categorias */}
+
+            <div className="border rounded-md p-4 flex flex-col h-[400px]">
+              <div className="flex justify-between items-center mb-4 shrink-0">
+                <h3 className="font-semibold text-lg">Categorias</h3>
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => openCategoryModal()}
+                >
+                  <Plus className="w-4 h-4 mr-2" /> Nova Categoria
+                </Button>
+              </div>
+
+              {categories.length === 0 ? (
+                <div className="flex-1 flex items-center justify-center">
+                  <p className="text-sm text-muted-foreground text-center">
+                    Nenhuma categoria cadastrada.
+                  </p>
+                </div>
+              ) : (
+                <ScrollArea className="flex-1 min-h-0 **:data-radix-scroll-area-thumb:hidden pr-3">
+                  <ul className="space-y-2">
+                    {categories.map((cat) => (
+                      <li
+                        key={cat.id}
+                        className="flex justify-between items-center bg-muted/50 px-3 py-2 rounded-md"
+                      >
+                        <span className="text-sm font-medium">{cat.name}</span>
+
+                        <div className="flex gap-2">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => openCategoryModal(cat)}
+                          >
+                            <Pencil className="w-4 h-4 text-blue-500" />
+                          </Button>
+
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleDeleteCategory(cat.id)}
+                          >
+                            <Trash2 className="w-4 h-4 text-red-500" />
+                          </Button>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </ScrollArea>
+              )}
+            </div>
+
+            {/* Unidades */}
+
+            <div className="border rounded-md p-4 flex flex-col h-[400px]">
+              <div className="flex justify-between items-center mb-4 shrink-0">
+                <h3 className="font-semibold text-lg">Unidades de Medida</h3>
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => openUnitModal()}
+                >
+                  <Plus className="w-4 h-4 mr-2" /> Nova Unidade
+                </Button>
+              </div>
+
+              {units.length === 0 ? (
+                <div className="flex-1 flex items-center justify-center">
+                  <p className="text-sm text-muted-foreground text-center">
+                    Nenhuma unidade cadastrada.
+                  </p>
+                </div>
+              ) : (
+                <ScrollArea className="flex-1 min-h-0 **:data-radix-scroll-area-thumb:hidden pr-3">
+                  <ul className="space-y-2">
+                    {units.map((u) => (
+                      <li
+                        key={u.id}
+                        className="flex justify-between items-center bg-muted/50 px-3 py-2 rounded-md"
+                      >
+                        <div className="flex flex-col">
+                          <span className="text-sm font-medium">{u.name}</span>
+
+                          <span className="text-xs text-muted-foreground">
+                            Sigla: {u.abbreviation} | Casas Decimais:{" "}
+                            {u.decimalPlaces}
+                          </span>
+                        </div>
+
+                        <div className="flex gap-2">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => openUnitModal(u)}
+                          >
+                            <Pencil className="w-4 h-4 text-blue-500" />
+                          </Button>
+
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleDeleteUnit(u.id)}
+                          >
+                            <Trash2 className="w-4 h-4 text-red-500" />
+                          </Button>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </ScrollArea>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Modal Categoria */}
+
+        <Dialog
+          open={isCategoryModalOpen}
+          onOpenChange={setIsCategoryModalOpen}
+        >
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>
+                {editingCategory ? "Editar Categoria" : "Nova Categoria"}
+              </DialogTitle>
+            </DialogHeader>
+
+            <div className="py-4 space-y-2">
+              <Label>Nome da Categoria</Label>
+
+              <Input
+                value={categoryName}
+                onChange={(e) => setCategoryName(e.target.value)}
+                placeholder="Ex: Bebidas"
+              />
+            </div>
+
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setIsCategoryModalOpen(false)}
+              >
+                Cancelar
+              </Button>
+
+              <Button onClick={handleSaveCategory}>Salvar</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Modal Unidade */}
+
+        <Dialog open={isUnitModalOpen} onOpenChange={setIsUnitModalOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>
+                {editingUnit ? "Editar Unidade" : "Nova Unidade"}
+              </DialogTitle>
+            </DialogHeader>
+
+            <div className="py-4 space-y-4">
+              <div className="space-y-2">
+                <Label>Nome</Label>
+
+                <Input
+                  value={unitForm.name}
+                  onChange={(e) =>
+                    setUnitForm({ ...unitForm, name: e.target.value })
+                  }
+                  placeholder="Ex: Quilo"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Sigla</Label>
+
+                <Input
+                  value={unitForm.abbreviation}
+                  onChange={(e) =>
+                    setUnitForm({ ...unitForm, abbreviation: e.target.value })
+                  }
+                  placeholder="Ex: KG"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Casas Decimais (0 a 3)</Label>
+
+                <Input
+                  type="number"
+                  min="0"
+                  max="3"
+                  value={unitForm.decimalPlaces}
+                  onChange={(e) =>
+                    setUnitForm({
+                      ...unitForm,
+                      decimalPlaces: Number(e.target.value),
+                    })
+                  }
+                />
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setIsUnitModalOpen(false)}
+              >
+                Cancelar
+              </Button>
+
+              <Button onClick={handleSaveUnit}>Salvar</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </CardContent>
+    </Card>
   );
 }
