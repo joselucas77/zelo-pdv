@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Html5Qrcode, CameraDevice } from "html5-qrcode";
+import { Html5Qrcode } from "html5-qrcode";
 import {
   Dialog,
   DialogContent,
@@ -10,14 +10,6 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
 
 interface BarcodeScannerProps {
   open: boolean;
@@ -30,41 +22,11 @@ export function BarcodeScanner({
   onOpenChange,
   onScan,
 }: BarcodeScannerProps) {
-  const [cameras, setCameras] = useState<CameraDevice[]>([]);
-  const [selectedCamera, setSelectedCamera] = useState<string>("");
   const [isScanning, setIsScanning] = useState(false);
   const [error, setError] = useState("");
   const scannerRef = useRef<Html5Qrcode | null>(null);
 
-  // Initialize and get cameras when modal opens
-  useEffect(() => {
-    if (open) {
-      Html5Qrcode.getCameras()
-        .then((devices) => {
-          if (devices && devices.length) {
-            setCameras(devices);
-            // Default to back camera if available, otherwise the first one
-            const backCam = devices.find(
-              (c) =>
-                c.label.toLowerCase().includes("back") ||
-                c.label.toLowerCase().includes("traseira") ||
-                c.label.toLowerCase().includes("ambiente"),
-            );
-            setSelectedCamera(backCam ? backCam.id : devices[0].id);
-          } else {
-            setError("Nenhuma câmera encontrada no dispositivo.");
-          }
-        })
-        .catch(() => {
-          setError("Por favor, permita o acesso à câmera para continuar.");
-        });
-    } else {
-      stopScan();
-    }
-  }, [open]);
-
   const startScan = async () => {
-    if (!selectedCamera) return;
     setError("");
 
     try {
@@ -73,7 +35,7 @@ export function BarcodeScanner({
       }
 
       await scannerRef.current.start(
-        selectedCamera,
+        { facingMode: "environment" },
         {
           fps: 10,
           qrbox: { width: 250, height: 150 },
@@ -89,7 +51,9 @@ export function BarcodeScanner({
       );
       setIsScanning(true);
     } catch (err) {
-      setError("Falha ao iniciar a leitura da câmera.");
+      setError(
+        "Nenhuma câmera traseira encontrada ou sem permissão de acesso.",
+      );
       setIsScanning(false);
     }
   };
@@ -104,6 +68,16 @@ export function BarcodeScanner({
       }
     }
   };
+
+  useEffect(() => {
+    if (open) {
+      // Small timeout to ensure DOM is ready before injecting the video
+      const timeout = setTimeout(() => startScan(), 100);
+      return () => clearTimeout(timeout);
+    } else {
+      stopScan();
+    }
+  }, [open]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -120,48 +94,31 @@ export function BarcodeScanner({
         <DialogHeader>
           <DialogTitle>Ler Código de Barras</DialogTitle>
           <DialogDescription>
-            Aponte a câmera para o código de barras (EAN-13, QR, etc).
+            Aponte a câmera traseira para o código de barras.
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4 py-2">
+        <div className="space-y-4 py-2 flex flex-col items-center">
           {error && (
             <p className="text-sm text-red-500 font-medium text-center">
               {error}
             </p>
           )}
 
-          {!isScanning && cameras.length > 0 && (
-            <div className="space-y-2">
-              <Label>Selecione a Câmera</Label>
-              <Select
-                value={selectedCamera}
-                onValueChange={(val) => setSelectedCamera(val || "")}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {cameras.map((c) => (
-                    <SelectItem key={c.id} value={c.id}>
-                      {c.label || `Câmera ${c.id}`}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          )}
-
           <div
-            className={`w-full max-w-sm mx-auto overflow-hidden rounded-lg bg-black ${
+            className={`w-full max-w-sm overflow-hidden rounded-lg bg-black ${
               isScanning ? "block" : "hidden"
             }`}
           >
             <div id="reader" className="w-full"></div>
           </div>
+
+          {!isScanning && !error && (
+            <p className="text-sm text-muted-foreground">Iniciando câmera...</p>
+          )}
         </div>
 
-        <div className="flex justify-between items-center w-full mt-2">
+        <div className="flex justify-end w-full mt-2">
           <Button
             variant="outline"
             onClick={() => {
@@ -171,16 +128,6 @@ export function BarcodeScanner({
           >
             Cancelar
           </Button>
-
-          {isScanning ? (
-            <Button variant="destructive" onClick={stopScan}>
-              Parar Câmera
-            </Button>
-          ) : (
-            <Button onClick={startScan} disabled={!selectedCamera || !!error}>
-              Iniciar Leitura
-            </Button>
-          )}
         </div>
       </DialogContent>
     </Dialog>

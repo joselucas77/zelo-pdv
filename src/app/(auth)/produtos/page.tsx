@@ -445,7 +445,7 @@ function ProductForm({
             type="button"
             variant="outline"
             size="icon"
-            className="shrink-0"
+            className="shrink-0 lg:hidden"
             onClick={() => setIsScannerOpen(true)}
           >
             <ScanBarcode className="w-4 h-4" />
