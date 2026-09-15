@@ -177,11 +177,15 @@ export function ClientForm({
     setLoading(false);
   };
 
+  const requiredInputClass =
+    "border-primary/50 focus:ring-primary/50 bg-primary/[0.03]";
+
   const FormFields = (
     <div className="space-y-4">
       <div className="space-y-2">
-        <Label>Nome *</Label>
+        <Label>Nome</Label>
         <Input
+          className={requiredInputClass}
           value={form.name}
           onChange={(e) => setForm({ ...form, name: e.target.value })}
           placeholder="Nome completo do cliente"
@@ -192,6 +196,7 @@ export function ClientForm({
         <div className="space-y-2">
           <Label>Telefone / WhatsApp</Label>
           <Input
+            className={requiredInputClass}
             value={form.phone ?? ""}
             onChange={(e) => setForm({ ...form, phone: e.target.value })}
             placeholder="(00) 00000-0000"

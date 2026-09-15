@@ -416,11 +416,15 @@ function ProductForm({
   const updateString = (k: keyof FormState, v: string) =>
     setForm((f) => ({ ...f, [k]: v }));
 
+  const requiredInputClass =
+    "border-primary/50 focus:ring-primary/50 bg-primary/[0.03]";
+
   const FormFields = (
     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
       <div className="sm:col-span-2 space-y-2">
         <Label>Nome</Label>
         <Input
+          className={requiredInputClass}
           value={form.name}
           onChange={(e) => updateString("name", e.target.value)}
         />
@@ -459,7 +463,7 @@ function ProductForm({
           value={form.unit || ""}
           onValueChange={(value) => updateString("unit", value as string)}
         >
-          <SelectTrigger>
+          <SelectTrigger className={requiredInputClass}>
             <SelectValue placeholder="Selecione uma unidade">
               {units.find((u) => u.abbreviation === form.unit)?.name ||
                 form.unit}
@@ -490,7 +494,7 @@ function ProductForm({
           value={form.categoryId}
           onValueChange={(value) => updateString("categoryId", value as string)}
         >
-          <SelectTrigger>
+          <SelectTrigger className={requiredInputClass}>
             <SelectValue placeholder="Selecione uma categoria">
               {categories.find((c) => c.id === form.categoryId)?.name}
             </SelectValue>
@@ -527,6 +531,7 @@ function ProductForm({
       <div className="sm:col-span-2 space-y-2">
         <Label>Preço de venda</Label>
         <Input
+          className={requiredInputClass}
           type="number"
           step="0.01"
           value={form.salePrice === 0 ? "" : form.salePrice}
@@ -587,7 +592,7 @@ function ProductForm({
     return (
       <>
         <Drawer open={open} onOpenChange={onOpenChange}>
-          <DrawerContent className="h-screen">
+          <DrawerContent className="h-[90vh]">
             <DrawerHeader className="shrink-0 px-4">
               <DrawerTitle>
                 {isEdit ? "Editar produto" : "Novo produto"}

@@ -300,7 +300,7 @@ export function SaleVoucher({ sale, open, onClose, clientPhone }: Props) {
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={(o) => !o && onClose()}>
-        <DrawerContent className="h-screen">
+        <DrawerContent className="h-[90vh]">
           <DrawerHeader className="shrink-0 px-4">
             <DrawerTitle>Comprovante da venda</DrawerTitle>
           </DrawerHeader>

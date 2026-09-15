@@ -22,7 +22,8 @@ export async function PATCH(
 ) {
   try {
     const currentUser = await getCurrentUser();
-    if (!currentUser) return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
+    if (!currentUser)
+      return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
 
     const { id } = await params;
     const body = await request.json();
@@ -41,6 +42,46 @@ export async function PATCH(
       data: updateData,
       include: { group: true },
     });
+
+    if (id === currentUser.id) {
+      const { cookies } = await import("next/headers");
+      const { SignJWT } = await import("jose");
+
+      const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET);
+
+      const payload = {
+        sub: user.id,
+        email: user.email,
+        name: user.name,
+        permissions: user.group?.permissions || {},
+      };
+
+      const token = await new SignJWT(payload)
+        .setProtectedHeader({ alg: "HS256" })
+        .setExpirationTime("24h")
+        .sign(JWT_SECRET);
+
+      const cookieStore = await cookies();
+
+      cookieStore.set("token", token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        path: "/",
+        maxAge: 60 * 60 * 24,
+      });
+
+      const contextBase64 = Buffer.from(JSON.stringify(payload)).toString(
+        "base64",
+      );
+      cookieStore.set("user_context", contextBase64, {
+        httpOnly: false,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        path: "/",
+        maxAge: 60 * 60 * 24,
+      });
+    }
 
     const { password, ...safeUser } = user;
 
@@ -67,7 +108,8 @@ export async function DELETE(
 ) {
   try {
     const currentUser = await getCurrentUser();
-    if (!currentUser) return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
+    if (!currentUser)
+      return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
 
     const { id } = await params;
 
@@ -77,7 +119,10 @@ export async function DELETE(
     });
 
     if (firstUser && firstUser.id === id) {
-      return NextResponse.json({ error: "O primeiro usuário da loja não pode ser deletado." }, { status: 403 });
+      return NextResponse.json(
+        { error: "O primeiro usuário da loja não pode ser deletado." },
+        { status: 403 },
+      );
     }
 
     await prisma.user.delete({ where: { id, lojaId: currentUser.lojaId } });

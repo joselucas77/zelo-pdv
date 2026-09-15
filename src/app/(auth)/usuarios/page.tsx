@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { ArrowLeft, Eye, EyeOff, Loader2 } from "lucide-react";
+import { ArrowLeft, Eye, EyeOff, Loader2, Plus } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
+import { cn } from "@/lib/utils";
 import { z } from "zod";
 import {
   Drawer,
@@ -50,6 +51,7 @@ import {
   getAccessGroups,
   type AccessGroupDTO,
 } from "@/services/accessGroup.service";
+import { usePermissions } from "@/components/auth/permissions-provider";
 
 export type AppUser = {
   id: string;
@@ -98,6 +100,7 @@ const userFormSchema = z.object({
 });
 
 export default function UsuariosPage() {
+  const { user: currentUser } = usePermissions();
   const [users, setUsers] = useState<AppUser[]>([]);
   const [groups, setGroups] = useState<AccessGroupDTO[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -129,52 +132,46 @@ export default function UsuariosPage() {
     loadData();
   }, []);
 
-  const handleToggleUser = async (id: string, currentStatus: boolean) => {
-    try {
-      await usersService.toggleActive(id, !currentStatus);
-      setUsers((prev) =>
-        prev.map((u) => (u.id === id ? { ...u, active: !currentStatus } : u)),
-      );
-      toast.success(`Usuário ${!currentStatus ? "ativado" : "desativado"}`);
-    } catch (error) {
-      console.error(error);
-      toast.error("Erro ao alterar status do usuário.");
-    }
-  };
-
-  const enrichedUsers = useMemo<UserTableData[]>(() => {
-    const groupMap = Object.fromEntries(groups.map((g) => [g.id || "", g]));
-
-    // Find the oldest user by createdAt
-    const oldestUser = users.reduce(
-      (oldest, current) => {
-        if (!oldest) return current;
-        const oldestDate = new Date(oldest.createdAt || 0);
-        const currentDate = new Date(current.createdAt || 0);
-        return currentDate < oldestDate ? current : oldest;
-      },
-      null as AppUser | null,
-    );
-
-    return users.map((u) => ({
-      ...u,
-      groupLabel: u.group?.name ?? groupMap[u.groupId]?.name ?? "—",
-      isFirstUser: oldestUser?.id === u.id,
-    }));
+  const enrichedUsers = useMemo(() => {
+    return users.map((u, i) => {
+      const group = groups.find((g) => g.id === u.groupId);
+      return {
+        ...u,
+        groupLabel: group?.name || "Sem grupo",
+        isFirstUser: i === 0, // Primeiro retornado pelo banco (mais antigo)
+      };
+    });
   }, [users, groups]);
 
   const columns = useMemo(
     () =>
       getUserColumns({
-        onToggle: (id) => {
-          const target = users.find((u) => u.id === id);
-          if (target) handleToggleUser(id, target.active);
+        onToggle: async (id) => {
+          try {
+            const user = users.find((u) => u.id === id);
+            if (!user) return;
+            const updated = await usersService.update(id, {
+              active: !user.active,
+            });
+            setUsers((prev) =>
+              prev.map((u) =>
+                u.id === id ? { ...u, active: updated.active } : u,
+              ),
+            );
+            toast.success("Status atualizado!");
+
+            if (currentUser && updated.id === currentUser.sub) {
+              window.location.reload();
+            }
+          } catch (error) {
+            toast.error("Erro ao atualizar status.");
+          }
         },
-        onEdit: (user) => setEditing(user as AppUser),
-        onDelete: (user) => setDeleting(user as AppUser),
-        onChangePassword: (user) => setPasswordResetting(user as AppUser),
+        onEdit: (u) => setEditing(u as AppUser),
+        onDelete: (u) => setDeleting(u as AppUser),
+        onChangePassword: (u) => setPasswordResetting(u as AppUser),
       }),
-    [users],
+    [users, currentUser],
   );
 
   if (isLoading) {
@@ -187,7 +184,7 @@ export default function UsuariosPage() {
   }
 
   return (
-    <div className="w-full px-4">
+    <div className="flex-1 space-y-4 px-4 w-full">
       <div className="mb-4 mt-6">
         <Link
           href="/configuracoes"
@@ -195,6 +192,17 @@ export default function UsuariosPage() {
         >
           <ArrowLeft className="h-3.5 w-3.5" /> Voltar para Configurações
         </Link>
+      </div>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h2 className="text-2xl font-bold tracking-tight">Usuários</h2>
+          <p className="text-muted-foreground">
+            Gerencie os acessos ao sistema.
+          </p>
+        </div>
+        <Button onClick={() => setCreating(true)} className="rounded-xl">
+          <Plus className="mr-2 h-4 w-4" /> Novo usuário
+        </Button>
       </div>
 
       <UsersDataTable
@@ -222,6 +230,9 @@ export default function UsuariosPage() {
                 u.id === updatedUser.id ? { ...u, ...updatedUser } : u,
               ),
             );
+            if (currentUser && updatedUser.id === currentUser.sub) {
+              window.location.reload();
+            }
           } else {
             setUsers((prev) => [updatedUser, ...prev]);
           }
@@ -339,19 +350,24 @@ function UserForm({
     }
   };
 
+  const requiredInputClass =
+    "border-primary/50 focus:ring-primary/50 bg-primary/[0.03]";
+
   const FormFields = (
     <div className="space-y-4">
       <div className="sm:col-span-2 space-y-2">
-        <Label>Nome *</Label>
+        <Label>Nome</Label>
         <Input
+          className={requiredInputClass}
           value={form.name}
           onChange={(e) => setForm({ ...form, name: e.target.value })}
           placeholder="Ex.: Ana Silva"
         />
       </div>
       <div className="sm:col-span-2 space-y-2">
-        <Label>E-mail *</Label>
+        <Label>E-mail</Label>
         <Input
+          className={requiredInputClass}
           type="email"
           value={form.email}
           onChange={(e) => setForm({ ...form, email: e.target.value })}
@@ -368,7 +384,7 @@ function UserForm({
         />
       </div>
       <div className="sm:col-span-2 space-y-2">
-        <Label>{isEdit ? "Nova Senha (Opcional)" : "Senha *"}</Label>
+        <Label>{isEdit ? "Nova Senha (Opcional)" : "Senha"}</Label>
         <div className="relative">
           <Input
             type={showPassword ? "text" : "password"}
@@ -379,7 +395,7 @@ function UserForm({
                 ? "Deixe em branco para manter a atual"
                 : "Mínimo 6 caracteres"
             }
-            className="pr-10"
+            className={cn("pr-10", !isEdit && requiredInputClass)}
           />
           <button
             type="button"
@@ -396,12 +412,12 @@ function UserForm({
         </div>
       </div>
       <div className="sm:col-span-2 space-y-2">
-        <Label>Escopo de acesso *</Label>
+        <Label>Escopo de acesso</Label>
         <Select
           value={form.groupId}
           onValueChange={(v) => setForm({ ...form, groupId: v as string })}
         >
-          <SelectTrigger>
+          <SelectTrigger className={requiredInputClass}>
             <SelectValue placeholder="Selecione um grupo">
               {groups.find((g) => g.id === form.groupId)?.name}
             </SelectValue>
@@ -459,7 +475,7 @@ function UserForm({
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={onOpenChange}>
-        <DrawerContent className="h-screen">
+        <DrawerContent className="h-[90vh]">
           <DrawerHeader className="shrink-0 px-4">
             <DrawerTitle>
               {isEdit ? "Editar usuário" : "Novo usuário"}

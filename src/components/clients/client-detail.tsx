@@ -139,7 +139,7 @@ export default function ClientDetail({
   if (isMobile) {
     return (
       <Drawer open={!!client} onOpenChange={(o) => !o && onClose()}>
-        <DrawerContent className="h-screen">
+        <DrawerContent className="h-[90vh]">
           <DrawerHeader className="shrink-0 px-4">
             <DrawerTitle>{client.name}</DrawerTitle>
           </DrawerHeader>

@@ -414,7 +414,7 @@ export default function NovaVenda() {
             if (!o) setStep("cart");
           }}
         >
-          <DrawerContent className="h-screen">
+          <DrawerContent className="h-[90vh]">
             <DrawerHeader className="flex-row items-center gap-2 shrink-0 px-4 md:px-6">
               <Button size="icon" variant="ghost" onClick={handleCheckoutBack}>
                 <ArrowLeft className="h-4 w-4" />
@@ -537,7 +537,7 @@ export default function NovaVenda() {
                       value={payment}
                       onValueChange={(v) => setPayment(v as PaymentMethod)}
                     >
-                      <SelectTrigger className="w-2/5">
+                      <SelectTrigger className="w-2/5 border-primary/50 focus:ring-primary/50 bg-primary/[0.03]">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -744,7 +744,7 @@ export default function NovaVenda() {
                       value={payment}
                       onValueChange={(v) => setPayment(v as PaymentMethod)}
                     >
-                      <SelectTrigger className="w-2/5">
+                      <SelectTrigger className="w-2/5 border-primary/50 focus:ring-primary/50 bg-primary/[0.03]">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>

@@ -63,6 +63,7 @@ import { createLoja, getLoja, updateLoja } from "@/services/loja.service";
 import { LojaFormData, lojaSchema } from "@/lib/validations/loja";
 import { categoriesService } from "@/services/categories.service";
 import { unitsService, Unit, UnitFormData } from "@/services/units.service";
+import { usersService } from "@/services/users.service";
 
 export default function ConfiguracoesPage() {
   return (
@@ -97,14 +98,26 @@ function StoreSection() {
     async function fetchStoreData() {
       try {
         setLoading(true);
-        const data = await getLoja();
+        const [data, users] = await Promise.all([
+          getLoja(),
+          usersService.list().catch(() => []),
+        ]);
+
+        const firstUser = users.reduce((oldest: any, current: any) => {
+          if (!oldest) return current;
+          const oldestDate = new Date(oldest.createdAt || 0);
+          const currentDate = new Date(current.createdAt || 0);
+          return currentDate < oldestDate ? current : oldest;
+        }, null);
+
+        const firstUserName = firstUser?.name || "";
 
         if (data && (data as { id?: string }).id) {
           setLojaId((data as { id?: string }).id ?? null);
 
           const storeData = {
             name: data.name || "",
-            ownerName: data.ownerName || "",
+            ownerName: firstUserName || data.ownerName || "",
             document: data.document || "",
             phone: data.phone || "",
             email: data.email || "",
@@ -181,6 +194,9 @@ function StoreSection() {
     );
   }
 
+  const requiredInputClass =
+    "border-primary/50 focus:ring-primary/50 bg-primary/[0.03]";
+
   return (
     <Card className="mb-4">
       <CardHeader>
@@ -192,18 +208,21 @@ function StoreSection() {
       <CardContent className="space-y-4">
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div className="flex flex-col gap-2 sm:col-span-2">
-            <Label>Nome da loja *</Label>
+            <Label>Nome da loja</Label>
             <Input
+              className={requiredInputClass}
               value={form.name}
               onChange={(e) => update("name", e.target.value)}
               placeholder="Ex.: Boutique Bella"
             />
           </div>
           <div className="flex flex-col gap-2">
-            <Label>Responsável *</Label>
+            <Label>Responsável</Label>
             <Input
+              className="bg-muted/50 cursor-not-allowed"
               value={form.ownerName}
-              onChange={(e) => update("ownerName", e.target.value)}
+              disabled
+              title="O responsável é sempre o primeiro usuário admin da conta."
               placeholder="Nome do responsável"
             />
           </div>
@@ -239,18 +258,28 @@ function StoreSection() {
           </div>
         </div>
 
-        <div className="flex justify-end gap-2">
-          <Button
-            variant="outline"
-            disabled={!dirty || busy}
-            onClick={() => setForm(original)}
-          >
-            Cancelar
-          </Button>
-          <Button disabled={!canSave} onClick={handleSave}>
-            <Save className="mr-1 h-4 w-4" />
-            {busy ? "Salvando..." : lojaId ? "Salvar alterações" : "Criar loja"}
-          </Button>
+        <div className="flex flex-col items-end gap-3 mt-2">
+          <p className="text-xs text-muted-foreground text-right max-w-sm">
+            Nota: Algumas atualizações nos dados da loja podem exigir que você
+            saia e entre novamente no sistema para serem visualizadas.
+          </p>
+          <div className="flex justify-end gap-2">
+            <Button
+              variant="outline"
+              disabled={!dirty || busy}
+              onClick={() => setForm(original)}
+            >
+              Cancelar
+            </Button>
+            <Button disabled={!canSave} onClick={handleSave}>
+              <Save className="mr-1 h-4 w-4" />
+              {busy
+                ? "Salvando..."
+                : lojaId
+                  ? "Salvar alterações"
+                  : "Criar loja"}
+            </Button>
+          </div>
         </div>
       </CardContent>
     </Card>
@@ -554,8 +583,9 @@ function GroupForm({
         <div className="space-y-4">
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div className="sm:col-span-2 flex flex-col gap-2">
-              <Label>Nome *</Label>
+              <Label>Nome</Label>
               <Input
+                className="border-primary/50 focus:ring-primary/50 bg-primary/[0.03]"
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
                 placeholder="Ex.: Vendedor"
@@ -999,6 +1029,7 @@ function ProductsConfigSection() {
               <Label>Nome da Categoria</Label>
 
               <Input
+                className="border-primary/50 focus:ring-primary/50 bg-primary/[0.03]"
                 value={categoryName}
                 onChange={(e) => setCategoryName(e.target.value)}
                 placeholder="Ex: Bebidas"
@@ -1033,6 +1064,7 @@ function ProductsConfigSection() {
                 <Label>Nome</Label>
 
                 <Input
+                  className="border-primary/50 focus:ring-primary/50 bg-primary/[0.03]"
                   value={unitForm.name}
                   onChange={(e) =>
                     setUnitForm({ ...unitForm, name: e.target.value })
@@ -1045,6 +1077,7 @@ function ProductsConfigSection() {
                 <Label>Sigla</Label>
 
                 <Input
+                  className="border-primary/50 focus:ring-primary/50 bg-primary/[0.03]"
                   value={unitForm.abbreviation}
                   onChange={(e) =>
                     setUnitForm({ ...unitForm, abbreviation: e.target.value })

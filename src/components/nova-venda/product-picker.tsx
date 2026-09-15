@@ -104,7 +104,7 @@ export function ProductPicker({
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={(o) => !o && onClose()}>
-        <DrawerContent className="h-screen">
+        <DrawerContent className="h-[90vh]">
           <DrawerHeader className="flex-row items-center gap-2 mb-1">
             <div className="flex items-center gap-2">
               <Button size="icon" variant="ghost" onClick={onClose}>

@@ -69,7 +69,10 @@ export function UsersDataTable({
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
-    initialState: { pagination: { pageSize: 10 } },
+    initialState: {
+      pagination: { pageSize: 10 },
+      columnVisibility: { active: false },
+    },
   });
 
   // Sincroniza os filtros com as colunas da tabela

@@ -118,6 +118,11 @@ export function getUserColumns({
         value === "Todos" || row.getValue(id) === value,
     },
     {
+      accessorKey: "active",
+      header: "Status",
+      filterFn: "equals",
+    },
+    {
       id: "actions",
       header: () => <div className="text-right">Ações</div>,
       enableHiding: false,

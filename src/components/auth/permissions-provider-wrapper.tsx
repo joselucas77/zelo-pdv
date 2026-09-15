@@ -28,7 +28,12 @@ function getUserContext(): UserContext | null {
   try {
     const value = decodeURIComponent(cookie.substring("user_context=".length));
 
-    const decoded = atob(value);
+    const binaryString = atob(value);
+    const bytes = new Uint8Array(binaryString.length);
+    for (let i = 0; i < binaryString.length; i++) {
+      bytes[i] = binaryString.charCodeAt(i);
+    }
+    const decoded = new TextDecoder().decode(bytes);
 
     return JSON.parse(decoded) as UserContext;
   } catch {
