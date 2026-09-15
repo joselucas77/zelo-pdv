@@ -50,7 +50,7 @@ export function ProductPicker({
   }, [q, products]);
 
   const PickerContent = (
-    <div className="flex min-h-0 flex-1 flex-col px-4 pb-4">
+    <div className="flex min-h-0 flex-1 flex-col px-4 pb-4 overflow-hidden">
       <div className="relative shrink-0 mb-3">
         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <Input
@@ -65,27 +65,36 @@ export function ProductPicker({
         <ScrollArea className="h-full **:data-radix-scroll-area-thumb:hidden">
           <div className="space-y-1 pr-3 pb-4">
             {filtered.map((p) => {
-              const cartQty = cartItems.find((i) => i.productId === p.id)?.quantity || 0;
+              const cartQty =
+                cartItems.find((i) => i.productId === p.id)?.quantity || 0;
               const remaining = p.stock - cartQty;
               return (
-              <button
-                key={p.id}
-                onClick={() => onPick(p)}
-                className="flex w-full items-center gap-3 rounded-xl border border-border/60 p-2.5 text-left transition hover:border-primary/40 hover:bg-accent disabled:opacity-50"
-              >
-                <ProductThumb name={p.name} />
-                <div className="min-w-0 flex-1">
-                  <div className="truncate text-sm font-medium">{p.name}</div>
-                  <div className="text-xs text-muted-foreground">
-                    {remaining} em estoque
+                <button
+                  key={p.id}
+                  onClick={() => onPick(p)}
+                  className="flex w-full items-center gap-3 rounded-xl border border-border/60 p-2.5 text-left transition hover:border-primary/40 hover:bg-accent disabled:opacity-50"
+                >
+                  <ProductThumb name={p.name} />
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate text-sm font-medium">{p.name}</div>
+                    <div className="text-xs text-muted-foreground">
+                      {remaining} em estoque
+                    </div>
                   </div>
-                </div>
-                <div className="text-sm font-semibold tabular-nums">
-                  {currency(p.salePrice as number)}
-                </div>
-                {remaining <= 0 && <Badge variant="outline" className="text-amber-600 border-amber-600/30">Sem estoque</Badge>}
-              </button>
-            )})}
+                  <div className="text-sm font-semibold tabular-nums">
+                    {currency(p.salePrice as number)}
+                  </div>
+                  {remaining <= 0 && (
+                    <Badge
+                      variant="outline"
+                      className="text-amber-600 border-amber-600/30"
+                    >
+                      Sem estoque
+                    </Badge>
+                  )}
+                </button>
+              );
+            })}
           </div>
         </ScrollArea>
       </div>

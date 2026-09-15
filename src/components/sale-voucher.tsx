@@ -305,10 +305,14 @@ export function SaleVoucher({ sale, open, onClose, clientPhone }: Props) {
             <DrawerTitle>Comprovante da venda</DrawerTitle>
           </DrawerHeader>
           <div className="flex min-h-0 flex-1 flex-col px-4 pb-6 overflow-hidden">
-            <ScrollArea className="flex-1 **:data-radix-scroll-area-thumb:hidden">
-              {VoucherDesign}
-              <div className="mt-4">{ActionButtons}</div>
-            </ScrollArea>
+            <div className="flex-1 min-h-0 overflow-hidden">
+              <ScrollArea className="h-full **:data-radix-scroll-area-thumb:hidden">
+                <div className="pb-4">
+                  {VoucherDesign}
+                  <div className="mt-4">{ActionButtons}</div>
+                </div>
+              </ScrollArea>
+            </div>
           </div>
         </DrawerContent>
       </Drawer>
@@ -322,10 +326,12 @@ export function SaleVoucher({ sale, open, onClose, clientPhone }: Props) {
         <DialogHeader className="sr-only">
           <DialogTitle>Comprovante da venda</DialogTitle>
         </DialogHeader>
-        <ScrollArea className="flex-1 px-6 pt-6 **:data-radix-scroll-area-thumb:hidden">
-          {VoucherDesign}
-          <div className="mt-4 pb-6">{ActionButtons}</div>
-        </ScrollArea>
+        <div className="flex-1 min-h-0 overflow-hidden">
+          <ScrollArea className="h-full px-6 pt-6 **:data-radix-scroll-area-thumb:hidden">
+            {VoucherDesign}
+            <div className="mt-4 pb-6">{ActionButtons}</div>
+          </ScrollArea>
+        </div>
       </DialogContent>
     </Dialog>
   );

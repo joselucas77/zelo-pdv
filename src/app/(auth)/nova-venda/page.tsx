@@ -130,11 +130,14 @@ export default function NovaVenda() {
     setItems((prev) => {
       const exists = prev.find((i) => i.productId === p.id);
       const currentQty = exists ? exists.quantity : 0;
-      
+
       if (currentQty + 1 > p.stock) {
-        toast.warning(`Atenção: Estoque insuficiente para ${p.name}. (Em estoque: ${p.stock})`, {
-          duration: 4000,
-        });
+        toast.warning(
+          `Atenção: Estoque insuficiente para ${p.name}. (Em estoque: ${p.stock})`,
+          {
+            duration: 4000,
+          },
+        );
       }
 
       if (exists) {
@@ -156,12 +159,15 @@ export default function NovaVenda() {
 
   const updateQty = (id: string, qty: number) => {
     if (qty < 1) return;
-    
+
     const product = products.find((p) => p.id === id);
     if (product && qty > product.stock) {
-      toast.warning(`Atenção: Estoque insuficiente para ${product.name}. (Em estoque: ${product.stock})`, {
-        duration: 4000,
-      });
+      toast.warning(
+        `Atenção: Estoque insuficiente para ${product.name}. (Em estoque: ${product.stock})`,
+        {
+          duration: 4000,
+        },
+      );
     }
 
     setItems((prev) =>
@@ -221,7 +227,9 @@ export default function NovaVenda() {
     return (
       <div className="flex h-[60vh] w-full flex-col items-center justify-center gap-4 text-muted-foreground">
         <AlertTriangle className="h-12 w-12 text-destructive opacity-50" />
-        <p className="text-sm font-medium">Você não tem permissão para visualizar vendas.</p>
+        <p className="text-sm font-medium">
+          Você não tem permissão para visualizar vendas.
+        </p>
       </div>
     );
   }
@@ -416,7 +424,7 @@ export default function NovaVenda() {
               </DrawerTitle>
             </DrawerHeader>
 
-            <div className="flex min-h-0 flex-1 flex-col px-4 pb-6 md:px-6">
+            <div className="flex min-h-0 flex-1 flex-col px-4 pb-6 md:px-6 overflow-hidden">
               <div className="mb-3 shrink-0 rounded-xl border border-border bg-card p-3 text-sm">
                 <div className="font-medium">{client?.name}</div>
                 <div className="text-xs text-muted-foreground">
@@ -436,7 +444,10 @@ export default function NovaVenda() {
                       <ScrollArea className="h-full **:data-radix-scroll-area-thumb:hidden">
                         <div className="space-y-2 pr-3 pb-4 p-0.5">
                           {items.map((it) => (
-                            <Card key={it.productId} className="border-border/70">
+                            <Card
+                              key={it.productId}
+                              className="border-border/70"
+                            >
                               <CardContent className="flex items-center gap-3 p-3">
                                 <div className="min-w-0 flex-1">
                                   <div className="truncate text-sm font-medium">
@@ -620,7 +631,7 @@ export default function NovaVenda() {
               </DialogTitle>
             </DialogHeader>
 
-            <div className="flex min-h-0 flex-1 flex-col px-6 pb-6">
+            <div className="flex min-h-0 flex-1 flex-col px-6 pb-6 overflow-hidden">
               <div className="mb-3 shrink-0 rounded-xl border border-border bg-card p-3 text-sm">
                 <div className="font-medium">{client?.name}</div>
                 <div className="text-xs text-muted-foreground">
@@ -640,7 +651,10 @@ export default function NovaVenda() {
                       <ScrollArea className="h-[40vh] **:data-radix-scroll-area-thumb:hidden">
                         <div className="space-y-2 pr-3 pb-4 p-0.5">
                           {items.map((it) => (
-                            <Card key={it.productId} className="border-border/70">
+                            <Card
+                              key={it.productId}
+                              className="border-border/70"
+                            >
                               <CardContent className="flex items-center gap-3 p-3">
                                 <div className="min-w-0 flex-1">
                                   <div className="truncate text-sm font-medium">

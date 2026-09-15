@@ -376,8 +376,12 @@ export function ClientForm({
               {isEdit ? "Editar cliente" : "Novo cliente"}
             </DrawerTitle>
           </DrawerHeader>
-          <div className="flex min-h-0 flex-1 flex-col px-4 pb-6">
-            <ScrollArea className="flex-1 px-1">{FormFields}</ScrollArea>
+          <div className="flex min-h-0 flex-1 flex-col px-4 pb-6 overflow-hidden">
+            <div className="flex-1 min-h-0 overflow-hidden">
+              <ScrollArea className="h-full px-1">
+                <div className="pb-4">{FormFields}</div>
+              </ScrollArea>
+            </div>
             <div className="shrink-0 pt-4 mt-2 border-t border-border">
               {ActionButtons}
             </div>

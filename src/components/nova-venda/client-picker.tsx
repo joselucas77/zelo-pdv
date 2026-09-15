@@ -44,7 +44,7 @@ export function ClientPicker({
   }, [q, clients]);
 
   const PickerContent = (
-    <div className="flex min-h-0 flex-1 flex-col px-4 pb-4">
+    <div className="flex min-h-0 flex-1 flex-col px-4 pb-4 overflow-hidden">
       <div className="relative shrink-0 mb-3">
         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <Input

@@ -111,7 +111,7 @@ export function BarcodeScanner({
             </p>
           )}
 
-          <div className="w-full min-h-[250px] max-w-sm relative overflow-hidden rounded-lg bg-black flex items-center justify-center">
+          <div className="w-full min-h-62.5 max-w-sm relative overflow-hidden rounded-lg bg-black flex items-center justify-center">
             {!isScanning && !error && (
               <p className="text-sm text-muted-foreground absolute z-10">
                 Iniciando câmera...

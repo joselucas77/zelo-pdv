@@ -594,10 +594,12 @@ function ProductForm({
               </DrawerTitle>
             </DrawerHeader>
 
-            <div className="flex min-h-0 flex-1 flex-col px-4 pb-6">
-              <ScrollArea className="flex-1 **:data-radix-scroll-area-thumb:hidden">
-                {FormFields}
-              </ScrollArea>
+            <div className="flex min-h-0 flex-1 flex-col px-4 pb-6 overflow-hidden">
+              <div className="flex-1 min-h-0 overflow-hidden">
+                <ScrollArea className="h-full **:data-radix-scroll-area-thumb:hidden pr-4">
+                  <div className="pb-4">{FormFields}</div>
+                </ScrollArea>
+              </div>
 
               <div className="shrink-0 pt-4 border-t border-border">
                 {ActionButtons}
