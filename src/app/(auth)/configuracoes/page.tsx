@@ -195,7 +195,7 @@ function StoreSection() {
   }
 
   const requiredInputClass =
-    "border-primary/50 focus:ring-primary/50 bg-primary/[0.03]";
+    "border-primary/50 focus:ring-primary/50 bg-primary/3";
 
   return (
     <Card className="mb-4">
@@ -585,7 +585,7 @@ function GroupForm({
             <div className="sm:col-span-2 flex flex-col gap-2">
               <Label>Nome</Label>
               <Input
-                className="border-primary/50 focus:ring-primary/50 bg-primary/[0.03]"
+                className="border-primary/50 focus:ring-primary/50 bg-primary/3"
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
                 placeholder="Ex.: Vendedor"
@@ -1029,7 +1029,7 @@ function ProductsConfigSection() {
               <Label>Nome da Categoria</Label>
 
               <Input
-                className="border-primary/50 focus:ring-primary/50 bg-primary/[0.03]"
+                className="border-primary/50 focus:ring-primary/50 bg-primary/3"
                 value={categoryName}
                 onChange={(e) => setCategoryName(e.target.value)}
                 placeholder="Ex: Bebidas"
@@ -1064,7 +1064,7 @@ function ProductsConfigSection() {
                 <Label>Nome</Label>
 
                 <Input
-                  className="border-primary/50 focus:ring-primary/50 bg-primary/[0.03]"
+                  className="border-primary/50 focus:ring-primary/50 bg-primary/3"
                   value={unitForm.name}
                   onChange={(e) =>
                     setUnitForm({ ...unitForm, name: e.target.value })
@@ -1077,7 +1077,7 @@ function ProductsConfigSection() {
                 <Label>Sigla</Label>
 
                 <Input
-                  className="border-primary/50 focus:ring-primary/50 bg-primary/[0.03]"
+                  className="border-primary/50 focus:ring-primary/50 bg-primary/3"
                   value={unitForm.abbreviation}
                   onChange={(e) =>
                     setUnitForm({ ...unitForm, abbreviation: e.target.value })

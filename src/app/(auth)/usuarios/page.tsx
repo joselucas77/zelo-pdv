@@ -185,14 +185,6 @@ export default function UsuariosPage() {
 
   return (
     <div className="flex-1 space-y-4 px-4 w-full">
-      <div className="mb-4 mt-6">
-        <Link
-          href="/configuracoes"
-          className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition"
-        >
-          <ArrowLeft className="h-3.5 w-3.5" /> Voltar para Configurações
-        </Link>
-      </div>
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">Usuários</h2>
@@ -200,9 +192,6 @@ export default function UsuariosPage() {
             Gerencie os acessos ao sistema.
           </p>
         </div>
-        <Button onClick={() => setCreating(true)} className="rounded-xl">
-          <Plus className="mr-2 h-4 w-4" /> Novo usuário
-        </Button>
       </div>
 
       <UsersDataTable
