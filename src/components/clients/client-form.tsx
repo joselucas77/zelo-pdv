@@ -192,7 +192,7 @@ export function ClientForm({
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label>Telefone / WhatsApp</Label>
           <Input
@@ -218,20 +218,21 @@ export function ClientForm({
       <div className="space-y-3 rounded-xl border border-border p-4 bg-muted/20">
         <h3 className="text-sm font-medium">Endereço</h3>
 
-        <div className="grid grid-cols-4 gap-2">
-          <div className="col-span-3 space-y-2">
-            <Label>Rua</Label>
-            <Input
-              placeholder="Ex: Rua das Flores"
-              value={form.address.street}
-              onChange={(e) =>
-                setForm({
-                  ...form,
-                  address: { ...form.address, street: e.target.value },
-                })
-              }
-            />
-          </div>
+        <div className="col-span-2 space-y-2">
+          <Label>Rua</Label>
+          <Input
+            placeholder="Ex: Rua das Flores"
+            value={form.address.street}
+            onChange={(e) =>
+              setForm({
+                ...form,
+                address: { ...form.address, street: e.target.value },
+              })
+            }
+          />
+        </div>
+
+        <div className="grid grid-cols-2 gap-2">
           <div className="space-y-2">
             <Label>Número</Label>
             <Input
@@ -241,64 +242,6 @@ export function ClientForm({
                 setForm({
                   ...form,
                   address: { ...form.address, number: e.target.value },
-                })
-              }
-            />
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-2">
-          <div className="space-y-2">
-            <Label>Complemento</Label>
-            <Input
-              placeholder="Apto 12, Bloco A"
-              value={form.address.complement}
-              onChange={(e) =>
-                setForm({
-                  ...form,
-                  address: { ...form.address, complement: e.target.value },
-                })
-              }
-            />
-          </div>
-          <div className="space-y-2">
-            <Label>Bairro</Label>
-            <Input
-              placeholder="Centro"
-              value={form.address.neighborhood}
-              onChange={(e) =>
-                setForm({
-                  ...form,
-                  address: { ...form.address, neighborhood: e.target.value },
-                })
-              }
-            />
-          </div>
-        </div>
-
-        <div className="grid grid-cols-4 gap-2">
-          <div className="col-span-2 space-y-2">
-            <Label>Cidade</Label>
-            <Input
-              placeholder="São Paulo"
-              value={form.address.city}
-              onChange={(e) =>
-                setForm({
-                  ...form,
-                  address: { ...form.address, city: e.target.value },
-                })
-              }
-            />
-          </div>
-          <div className="space-y-2">
-            <Label>Estado</Label>
-            <Input
-              placeholder="SP"
-              value={form.address.state}
-              onChange={(e) =>
-                setForm({
-                  ...form,
-                  address: { ...form.address, state: e.target.value },
                 })
               }
             />
@@ -336,6 +279,63 @@ export function ClientForm({
             )}
           </div>
         </div>
+
+        <div className="space-y-2">
+          <Label>Complemento</Label>
+          <Input
+            placeholder="Apto 12, Bloco A"
+            value={form.address.complement}
+            onChange={(e) =>
+              setForm({
+                ...form,
+                address: { ...form.address, complement: e.target.value },
+              })
+            }
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label>Bairro</Label>
+          <Input
+            placeholder="Centro"
+            value={form.address.neighborhood}
+            onChange={(e) =>
+              setForm({
+                ...form,
+                address: { ...form.address, neighborhood: e.target.value },
+              })
+            }
+          />
+        </div>
+
+        <div className="grid grid-cols-2 gap-2">
+          <div className="space-y-2">
+            <Label>Cidade</Label>
+            <Input
+              placeholder="São Paulo"
+              value={form.address.city}
+              onChange={(e) =>
+                setForm({
+                  ...form,
+                  address: { ...form.address, city: e.target.value },
+                })
+              }
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>Estado</Label>
+            <Input
+              placeholder="SP"
+              value={form.address.state}
+              onChange={(e) =>
+                setForm({
+                  ...form,
+                  address: { ...form.address, state: e.target.value },
+                })
+              }
+            />
+          </div>
+        </div>
       </div>
 
       <div className="space-y-2">
@@ -363,11 +363,7 @@ export function ClientForm({
         disabled={form.name.trim().length < 2 || loading}
         onClick={submit}
       >
-        {loading
-          ? "Salvando..."
-          : isEdit
-            ? "Salvar alterações"
-            : "Cadastrar Cliente"}
+        {loading ? "Salvando..." : "Salvar"}
       </Button>
     </div>
   );
@@ -377,13 +373,11 @@ export function ClientForm({
       <Drawer open={open} onOpenChange={onOpenChange}>
         <DrawerContent className="h-[90vh]">
           <DrawerHeader className="shrink-0 px-4">
-            <DrawerTitle>
-              {isEdit ? "Editar cliente" : "Novo cliente"}
-            </DrawerTitle>
+            <DrawerTitle>{isEdit ? "Editar cliente" : "Adicionar"}</DrawerTitle>
           </DrawerHeader>
           <div className="flex min-h-0 flex-1 flex-col px-4 pb-6 overflow-hidden">
             <div className="flex-1 min-h-0 overflow-hidden">
-              <ScrollArea className="h-full px-1">
+              <ScrollArea className="h-full **:data-radix-scroll-area-thumb:hidden pr-4">
                 <div className="pb-4">{FormFields}</div>
               </ScrollArea>
             </div>
@@ -400,9 +394,7 @@ export function ClientForm({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[92vh] overflow-y-auto sm:max-w-xl">
         <DialogHeader>
-          <DialogTitle>
-            {isEdit ? "Editar cliente" : "Novo cliente"}
-          </DialogTitle>
+          <DialogTitle>{isEdit ? "Editar cliente" : "Adicionar"}</DialogTitle>
         </DialogHeader>
         {FormFields}
         <DialogFooter>{ActionButtons}</DialogFooter>

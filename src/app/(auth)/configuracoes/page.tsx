@@ -273,11 +273,7 @@ function StoreSection() {
             </Button>
             <Button disabled={!canSave} onClick={handleSave}>
               <Save className="mr-1 h-4 w-4" />
-              {busy
-                ? "Salvando..."
-                : lojaId
-                  ? "Salvar alterações"
-                  : "Criar loja"}
+              {busy ? "Salvando..." : "Salvar"}
             </Button>
           </div>
         </div>
@@ -350,7 +346,7 @@ function GroupsSection() {
           className="rounded-full"
           onClick={() => setCreating(true)}
         >
-          <Plus className="mr-1 h-4 w-4" /> Novo grupo
+          <Plus className="mr-1 h-4 w-4" /> Adicionar
         </Button>
       </CardHeader>
       <CardContent className="space-y-2">
@@ -575,9 +571,7 @@ function GroupForm({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[92vh] overflow-y-auto sm:max-w-2xl">
         <DialogHeader>
-          <DialogTitle>
-            {isEdit ? "Editar grupo" : "Novo grupo de acesso"}
-          </DialogTitle>
+          <DialogTitle>{isEdit ? "Editar grupo" : "Adicionar"}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">
@@ -701,7 +695,7 @@ function GroupForm({
             Cancelar
           </Button>
           <Button onClick={submit} disabled={!form.name.trim() || saving}>
-            {saving ? "Salvando..." : isEdit ? "Salvar" : "Criar grupo"}
+            {saving ? "Salvando..." : "Salvar"}
           </Button>
         </DialogFooter>
       </DialogContent>

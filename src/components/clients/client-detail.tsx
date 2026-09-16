@@ -145,7 +145,7 @@ export default function ClientDetail({
           </DrawerHeader>
           <div className="flex min-h-0 flex-1 flex-col px-4 pb-6 overflow-hidden">
             <div className="flex-1 min-h-0 overflow-hidden">
-              <ScrollArea className="h-full **:data-radix-scroll-area-thumb:hidden">
+              <ScrollArea className="h-full **:data-radix-scroll-area-thumb:hidden pr-4">
                 <div className="pb-4">{DetailContent}</div>
               </ScrollArea>
             </div>

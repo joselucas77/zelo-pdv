@@ -636,7 +636,7 @@ function ProductForm({
           }
         }}
       >
-        {isEdit ? "Salvar" : "Cadastrar"}
+        Salvar
       </Button>
     </div>
   );
@@ -648,7 +648,7 @@ function ProductForm({
           <DrawerContent className="h-[90vh]">
             <DrawerHeader className="shrink-0 px-4">
               <DrawerTitle>
-                {isEdit ? "Editar produto" : "Novo produto"}
+                {isEdit ? "Editar produto" : "Adicionar"}
               </DrawerTitle>
             </DrawerHeader>
 
@@ -679,9 +679,7 @@ function ProductForm({
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="max-h-[92vh] overflow-y-auto sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>
-              {isEdit ? "Editar produto" : "Novo produto"}
-            </DialogTitle>
+            <DialogTitle>{isEdit ? "Editar produto" : "Adicionar"}</DialogTitle>
           </DialogHeader>
           {FormFields}
           <DialogFooter>{ActionButtons}</DialogFooter>

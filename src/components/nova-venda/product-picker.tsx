@@ -62,8 +62,8 @@ export function ProductPicker({
       </div>
       <div className="min-h-0 flex-1">
         {/* SOLUÇÃO: Esconde a barra alvejando o elemento interno do Radix */}
-        <ScrollArea className="h-full **:data-radix-scroll-area-thumb:hidden">
-          <div className="space-y-1 pr-3 pb-4">
+        <ScrollArea className="h-full **:data-radix-scroll-area-thumb:hidden pr-4">
+          <div className="space-y-1 pb-4">
             {filtered.map((p) => {
               const cartQty =
                 cartItems.find((i) => i.productId === p.id)?.quantity || 0;

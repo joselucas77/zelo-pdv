@@ -85,7 +85,7 @@ export function ClientsDataTable({
         </div>
         {canAdd !== false && (
           <Button onClick={onCreateClick} size="sm" className="rounded-full">
-            <Plus className="mr-1 h-4 w-4" /> Novo
+            <Plus className="mr-1 h-4 w-4" /> Adicionar
           </Button>
         )}
       </div>

@@ -312,8 +312,8 @@ export default function NovaVenda() {
         </div>
       ) : (
         <div className="max-h-[50vh] flex-1">
-          <ScrollArea className="h-full **:data-radix-scroll-area-thumb:hidden">
-            <div className="space-y-2 p-0.5 pb-4 pr-3">
+          <ScrollArea className="h-full **:data-radix-scroll-area-thumb:hidden pr-4">
+            <div className="space-y-2 p-0.5 pb-4">
               {items.map((it) => (
                 <Card key={it.productId} className="border-border/70">
                   <CardContent className="flex items-center gap-3 p-3">
@@ -425,24 +425,24 @@ export default function NovaVenda() {
             </DrawerHeader>
 
             <div className="flex min-h-0 flex-1 flex-col px-4 pb-6 md:px-6 overflow-hidden">
-              <div className="mb-3 shrink-0 rounded-xl border border-border bg-card p-3 text-sm">
-                <div className="font-medium">{client?.name}</div>
-                <div className="text-xs text-muted-foreground">
-                  {items.length} item{items.length === 1 ? "" : "s"} ·{" "}
-                  {currency(total)}
-                </div>
-              </div>
-
-              {checkoutStep === "review" ? (
-                <>
-                  {items.length === 0 ? (
-                    <div className="mb-4 rounded-xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
-                      Carrinho vazio.
+              <div className="flex-1 min-h-0 overflow-hidden">
+                <ScrollArea className="h-full **:data-radix-scroll-area-thumb:hidden pr-4">
+                  <div className="pb-4">
+                    <div className="mb-3 shrink-0 rounded-xl border border-border bg-card p-3 text-sm">
+                      <div className="font-medium">{client?.name}</div>
+                      <div className="text-xs text-muted-foreground">
+                        {items.length} item{items.length === 1 ? "" : "s"} ·{" "}
+                        {currency(total)}
+                      </div>
                     </div>
-                  ) : (
-                    <div className="min-h-0 flex-1 mb-4">
-                      <ScrollArea className="h-full **:data-radix-scroll-area-thumb:hidden">
-                        <div className="space-y-2 pr-3 pb-4 p-0.5">
+
+                    {checkoutStep === "review" ? (
+                      items.length === 0 ? (
+                        <div className="mb-4 rounded-xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
+                          Carrinho vazio.
+                        </div>
+                      ) : (
+                        <div className="space-y-2 p-0.5">
                           {items.map((it) => (
                             <Card
                               key={it.productId}
@@ -495,122 +495,138 @@ export default function NovaVenda() {
                             </Card>
                           ))}
                         </div>
-                      </ScrollArea>
-                    </div>
-                  )}
-                  <div className="shrink-0">
-                    <Button
-                      onClick={() => setStep("payment")}
-                      size="lg"
-                      className="w-full rounded-full"
-                      disabled={items.length === 0}
-                    >
-                      Avançar para pagamento · {currency(total)}
-                    </Button>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div className="min-h-0 flex-1 mb-3">
-                    <ScrollArea className="h-full **:data-radix-scroll-area-thumb:hidden pr-2">
-                      <div className="space-y-1 pr-2">
-                        {items.map((it) => (
-                          <div
-                            key={it.productId}
-                            className="flex items-center justify-between text-sm"
-                          >
-                            <div className="min-w-0 truncate pr-2">
-                              {it.quantity}× {it.productName}
+                      )
+                    ) : (
+                      <>
+                        <div className="space-y-1 mb-4">
+                          {items.map((it) => (
+                            <div
+                              key={it.productId}
+                              className="flex items-center justify-between text-sm"
+                            >
+                              <div className="min-w-0 truncate pr-2">
+                                {it.quantity}× {it.productName}
+                              </div>
+                              <div className="font-medium tabular-nums">
+                                {currency(it.unitPrice * it.quantity)}
+                              </div>
                             </div>
-                            <div className="font-medium tabular-nums">
-                              {currency(it.unitPrice * it.quantity)}
+                          ))}
+                        </div>
+
+                        <div className="mb-3 flex flex-col gap-2">
+                          <Label>Forma de pagamento</Label>
+                          <Select
+                            value={payment}
+                            onValueChange={(v) =>
+                              setPayment(v as PaymentMethod)
+                            }
+                          >
+                            <SelectTrigger className="w-2/5 border-primary/50 focus:ring-primary/50 bg-primary/3">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {Object.entries(PAYMENT_LABELS).map(([k, v]) => (
+                                <SelectItem key={k} value={k}>
+                                  {v}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        <div className="mb-3">
+                          <Label>Status</Label>
+                          <div className="mt-1 grid grid-cols-2 gap-2">
+                            {Object.values(SaleStatus).map((s) => (
+                              <button
+                                key={s}
+                                onClick={() => setStatus(s)}
+                                className={cn(
+                                  "rounded-xl border px-3 py-2 text-sm font-medium transition",
+                                  status === s
+                                    ? "border-primary bg-primary/10 text-primary"
+                                    : "border-border text-muted-foreground",
+                                )}
+                              >
+                                {s === SaleStatus.PAGO ? "Pago" : "Pendente"}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        {status === SaleStatus.PENDENTE && (
+                          <div className="mb-3 space-y-2 rounded-xl border border-amber-500/30 bg-amber-500/5 p-3">
+                            <div className="text-sm text-amber-700">
+                              Valor pendente:{" "}
+                              <span className="font-semibold">
+                                {currency(total)}
+                              </span>
+                            </div>
+                            <div className="mt-2 flex flex-col gap-1.5">
+                              <Label>Data prevista</Label>
+                              <Input
+                                type="date"
+                                value={dueDate}
+                                onChange={(e) => setDueDate(e.target.value)}
+                              />
                             </div>
                           </div>
-                        ))}
-                      </div>
-                    </ScrollArea>
+                        )}
+
+                        <div className="mb-4 flex flex-col gap-2">
+                          <Label>Observações</Label>
+                          <Textarea
+                            rows={2}
+                            value={notes}
+                            onChange={(e) => setNotes(e.target.value)}
+                          />
+                        </div>
+                      </>
+                    )}
                   </div>
+                </ScrollArea>
+              </div>
 
-                  <div className="mb-3 flex flex-col gap-2">
-                    <Label>Forma de pagamento</Label>
-                    <Select
-                      value={payment}
-                      onValueChange={(v) => setPayment(v as PaymentMethod)}
-                    >
-                      <SelectTrigger className="w-2/5 border-primary/50 focus:ring-primary/50 bg-primary/3">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {Object.entries(PAYMENT_LABELS).map(([k, v]) => (
-                          <SelectItem key={k} value={k}>
-                            {v}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="mb-3">
-                    <Label>Status</Label>
-                    <div className="mt-1 grid grid-cols-2 gap-2">
-                      {Object.values(SaleStatus).map((s) => (
-                        <button
-                          key={s}
-                          onClick={() => setStatus(s)}
-                          className={cn(
-                            "rounded-xl border px-3 py-2 text-sm font-medium transition",
-                            status === s
-                              ? "border-primary bg-primary/10 text-primary"
-                              : "border-border text-muted-foreground",
-                          )}
-                        >
-                          {s === SaleStatus.PAGO ? "Pago" : "Pendente"}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {status === SaleStatus.PENDENTE && (
-                    <div className="mb-3 space-y-2 rounded-xl border border-amber-500/30 bg-amber-500/5 p-3">
-                      <div className="text-sm text-amber-700">
-                        Valor pendente:{" "}
-                        <span className="font-semibold">{currency(total)}</span>
-                      </div>
-                      <div className="mt-2 flex flex-col gap-1.5">
-                        <Label>Data prevista</Label>
-                        <Input
-                          type="date"
-                          value={dueDate}
-                          onChange={(e) => setDueDate(e.target.value)}
-                        />
-                      </div>
-                    </div>
-                  )}
-
-                  <div className="mb-4 flex flex-col gap-2">
-                    <Label>Observações</Label>
-                    <Textarea
-                      rows={2}
-                      value={notes}
-                      onChange={(e) => setNotes(e.target.value)}
-                    />
-                  </div>
-
-                  <div className="flex gap-2 pb-4 shrink-0 mt-auto">
+              <div className="shrink-0 pt-4 border-t border-border">
+                {checkoutStep === "review" ? (
+                  <Button
+                    onClick={() => setStep("payment")}
+                    size="lg"
+                    className="w-full rounded-full"
+                    disabled={items.length === 0}
+                  >
+                    Avançar para pagamento · {currency(total)}
+                  </Button>
+                ) : (
+                  <div className="flex gap-2">
                     <Button
-                      onClick={finalize}
+                      variant="outline"
+                      onClick={() => setStep("review")}
                       size="lg"
-                      disabled={isFinalizing || !can("nova-venda", "Adicionar")}
-                      className="flex-1 rounded-full"
+                      className="rounded-full"
+                      disabled={saving}
                     >
-                      <Check className="mr-2 h-4 w-4" />
-                      {isFinalizing
-                        ? "Salvando..."
-                        : `Confirmar · ${currency(total)}`}
+                      Voltar
+                    </Button>
+                    <Button
+                      size="lg"
+                      className="flex-1 rounded-full"
+                      onClick={finishSale}
+                      disabled={saving || !client}
+                    >
+                      {saving ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />{" "}
+                          Salvando...
+                        </>
+                      ) : (
+                        `Confirmar venda (${currency(total)})`
+                      )}
                     </Button>
                   </div>
-                </>
-              )}
+                )}
+              </div>
             </div>
           </DrawerContent>
         </Drawer>

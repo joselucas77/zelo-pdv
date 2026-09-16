@@ -180,7 +180,7 @@ export function UsersDataTable({
           size="sm"
           className="rounded-full hidden sm:flex shrink-0"
         >
-          <Plus className="mr-1 h-4 w-4" /> Novo
+          <Plus className="mr-1 h-4 w-4" /> Adicionar
         </Button>
       </div>
 

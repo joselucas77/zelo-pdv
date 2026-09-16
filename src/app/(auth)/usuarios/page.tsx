@@ -364,7 +364,7 @@ function UserForm({
         />
       </div>
       <div className="sm:col-span-2 space-y-2">
-        <Label>Telefone (Opcional)</Label>
+        <Label>Telefone</Label>
         <Input
           type="tel"
           value={form.phone || ""}
@@ -400,46 +400,44 @@ function UserForm({
           </button>
         </div>
       </div>
-      <div className="sm:col-span-2 space-y-2">
-        <Label>Escopo de acesso</Label>
-        <Select
-          value={form.groupId}
-          onValueChange={(v) => setForm({ ...form, groupId: v as string })}
-        >
-          <SelectTrigger className={requiredInputClass}>
-            <SelectValue placeholder="Selecione um grupo">
-              {groups.find((g) => g.id === form.groupId)?.name}
-            </SelectValue>
-          </SelectTrigger>
-          <SelectContent>
-            {selectableGroups.length === 0 && (
-              <div className="px-2 py-1.5 text-xs text-muted-foreground">
-                Nenhum grupo ativo cadastrado.
-              </div>
-            )}
-            {selectableGroups.map((g) => (
-              <SelectItem key={g.id} value={g.id!}>
-                {g.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-      <div className="flex items-center justify-between rounded-lg border border-border/70 p-3">
-        <div>
-          <div className="text-sm font-medium">Status</div>
-          <div className="text-xs text-muted-foreground">
-            Usuários inativos não acessam o sistema.
-          </div>
+      <div className="sm:col-span-2 flex gap-4">
+        <div className="flex-1 space-y-2">
+          <Label>Tipo de acesso</Label>
+          <Select
+            value={form.groupId}
+            onValueChange={(v) => setForm({ ...form, groupId: v as string })}
+          >
+            <SelectTrigger className={requiredInputClass}>
+              <SelectValue placeholder="Selecione um grupo">
+                {groups.find((g) => g.id === form.groupId)?.name}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              {selectableGroups.length === 0 && (
+                <div className="px-2 py-1.5 text-xs text-muted-foreground">
+                  Nenhum grupo ativo cadastrado.
+                </div>
+              )}
+              {selectableGroups.map((g) => (
+                <SelectItem key={g.id} value={g.id!}>
+                  {g.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-muted-foreground">
-            {form.active ? "Ativo" : "Inativo"}
-          </span>
-          <Switch
-            checked={form.active}
-            onCheckedChange={(v) => setForm({ ...form, active: v })}
-          />
+
+        <div className="shrink-0 space-y-2">
+          <Label>Usuário Ativo</Label>
+          <div className="flex items-center gap-2 h-9">
+            <Switch
+              checked={form.active}
+              onCheckedChange={(v) => setForm({ ...form, active: v })}
+            />
+            <span className="text-sm text-muted-foreground min-w-12">
+              {form.active ? "Ativo" : "Inativo"}
+            </span>
+          </div>
         </div>
       </div>
     </div>
@@ -456,7 +454,7 @@ function UserForm({
       </Button>
       <Button onClick={submit} disabled={isSubmitting}>
         {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-        {isEdit ? "Salvar alterações" : "Criar usuário"}
+        Salvar
       </Button>
     </div>
   );
@@ -466,13 +464,11 @@ function UserForm({
       <Drawer open={open} onOpenChange={onOpenChange}>
         <DrawerContent className="h-[90vh]">
           <DrawerHeader className="shrink-0 px-4">
-            <DrawerTitle>
-              {isEdit ? "Editar usuário" : "Novo usuário"}
-            </DrawerTitle>
+            <DrawerTitle>{isEdit ? "Editar usuário" : "Adicionar"}</DrawerTitle>
           </DrawerHeader>
           <div className="flex min-h-0 flex-1 flex-col px-4 pb-6 overflow-hidden">
             <div className="flex-1 min-h-0 overflow-hidden">
-              <ScrollArea className="h-full **:data-radix-scroll-area-thumb:hidden">
+              <ScrollArea className="h-full **:data-radix-scroll-area-thumb:hidden pr-4">
                 <div className="pb-4">{FormFields}</div>
               </ScrollArea>
             </div>
@@ -489,9 +485,7 @@ function UserForm({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[92vh] overflow-y-auto sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>
-            {isEdit ? "Editar usuário" : "Novo usuário"}
-          </DialogTitle>
+          <DialogTitle>{isEdit ? "Editar usuário" : "Adicionar"}</DialogTitle>
         </DialogHeader>
         {FormFields}
         <DialogFooter>{ActionButtons}</DialogFooter>
