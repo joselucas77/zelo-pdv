@@ -465,8 +465,8 @@ function ProductForm({
     "border-primary/50 focus:ring-primary/50 bg-primary/[0.03]";
 
   const FormFields = (
-    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-      <div className="sm:col-span-2 space-y-2">
+    <div className="grid grid-cols-2 gap-3">
+      <div className="col-span-2 space-y-2">
         <Label>Nome</Label>
         <Input
           className={requiredInputClass}
@@ -476,7 +476,7 @@ function ProductForm({
         />
       </div>
 
-      <div className="sm:col-span-2 space-y-2">
+      <div className="col-span-2 space-y-2">
         <Label>Descrição</Label>
         <Textarea
           rows={2}
@@ -485,7 +485,7 @@ function ProductForm({
         />
       </div>
 
-      <div className="space-y-2">
+      <div className="col-span-2 sm:col-span-1 space-y-2">
         <Label>Código (Alternativo)</Label>
         <Input
           value={form.code}
@@ -493,7 +493,7 @@ function ProductForm({
         />
       </div>
 
-      <div className="space-y-2">
+      <div className="col-span-2 sm:col-span-1 space-y-2">
         <Label>Código de Barras</Label>
         <div className="flex gap-2">
           <Input
@@ -504,7 +504,7 @@ function ProductForm({
             type="button"
             variant="outline"
             size="icon"
-            className="shrink-0 lg:hidden"
+            className="shrink-0 sm:hidden"
             onClick={() => setIsScannerOpen(true)}
           >
             <ScanBarcode className="w-4 h-4" />
@@ -600,7 +600,7 @@ function ProductForm({
         />
       </div>
 
-      <div className="sm:col-span-2 space-y-2">
+      <div className="col-span-2 space-y-2">
         <Label>URL da Imagem</Label>
         <Input
           value={form.image}
@@ -609,7 +609,7 @@ function ProductForm({
         />
       </div>
 
-      <div className="sm:col-span-2 space-y-2">
+      <div className="col-span-2 space-y-2">
         <Label>Observações</Label>
         <Textarea
           rows={2}
