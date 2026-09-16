@@ -354,8 +354,6 @@ function StockEntry({
                 value={qty}
                 onChange={(e) => setQty(Number(e.target.value))}
                 inputMode="numeric"
-                value={rawQty}
-                onChange={(e) => handleQtyChange(e.target.value)}
                 onFocus={(e) => e.target.select()}
               />
             </div>
