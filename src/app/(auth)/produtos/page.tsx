@@ -349,6 +349,10 @@ function StockEntry({
               <Label>Quantidade a adicionar</Label>
 
               <Input
+                type="number"
+                min={1}
+                value={qty}
+                onChange={(e) => setQty(Number(e.target.value))}
                 inputMode="numeric"
                 value={rawQty}
                 onChange={(e) => handleQtyChange(e.target.value)}
@@ -524,6 +528,7 @@ function ProductForm({
       </div>
 
       <div className="sm:col-span-2 space-y-2">
+        <Label>URL da Imagem (Opcional)</Label>
         <Label>URL da Imagem</Label>
         <Input
           value={form.image}
@@ -554,6 +559,10 @@ function ProductForm({
       </div>
 
       <div className="sm:col-span-2 space-y-2">
+        <Label>
+          Preço de venda{" "}
+          <span className="text-xs text-muted-foreground">(obrigatório)</span>
+        </Label>
         <Label>Preço de venda</Label>
         <Input
           className={requiredInputClass}
