@@ -1,10 +1,10 @@
 import {
   LayoutDashboard,
   Package,
-  Plus,
   Receipt,
   Settings,
   Users,
+  DollarSign,
 } from "lucide-react";
 
 type NavItem = {
@@ -32,7 +32,7 @@ export const NAV: NavItem[] = [
     to: "/nova-venda",
     label: "Nova Venda",
     short: "Vender",
-    icon: Plus,
+    icon: DollarSign,
     primary: true,
   },
   { to: "/clientes", label: "Clientes", short: "Clientes", icon: Users },

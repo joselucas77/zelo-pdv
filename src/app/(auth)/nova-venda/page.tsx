@@ -537,7 +537,7 @@ export default function NovaVenda() {
                       value={payment}
                       onValueChange={(v) => setPayment(v as PaymentMethod)}
                     >
-                      <SelectTrigger className="w-2/5 border-primary/50 focus:ring-primary/50 bg-primary/[0.03]">
+                      <SelectTrigger className="w-2/5 border-primary/50 focus:ring-primary/50 bg-primary/3">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -744,7 +744,7 @@ export default function NovaVenda() {
                       value={payment}
                       onValueChange={(v) => setPayment(v as PaymentMethod)}
                     >
-                      <SelectTrigger className="w-2/5 border-primary/50 focus:ring-primary/50 bg-primary/[0.03]">
+                      <SelectTrigger className="w-2/5 border-primary/50 focus:ring-primary/50 bg-primary/3">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>

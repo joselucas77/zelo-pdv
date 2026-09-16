@@ -1,7 +1,13 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
-import { AlertTriangle, Clock, DollarSign, Package, Loader2 } from "lucide-react";
+import {
+  AlertTriangle,
+  Clock,
+  DollarSign,
+  Package,
+  Loader2,
+} from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { currency, dateTime, isToday } from "@/lib/format";
@@ -118,7 +124,9 @@ export default function Dashboard() {
     return (
       <div className="flex h-[60vh] w-full flex-col items-center justify-center gap-4 text-muted-foreground">
         <AlertTriangle className="h-12 w-12 text-destructive opacity-50" />
-        <p className="text-sm font-medium">Você não tem permissão para visualizar o dashboard.</p>
+        <p className="text-sm font-medium">
+          Você não tem permissão para visualizar o dashboard.
+        </p>
       </div>
     );
   }
@@ -129,7 +137,9 @@ export default function Dashboard() {
     <div className="px-4">
       <div className="mb-6">
         <h1 className="text-2xl font-bold tracking-tight">Olá, {firstName}</h1>
-        <p className="text-sm text-muted-foreground">Aqui está o resumo da sua loja hoje.</p>
+        <p className="text-sm text-muted-foreground">
+          Aqui está o resumo da sua loja hoje.
+        </p>
       </div>
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
         <StatCard
@@ -184,53 +194,55 @@ export default function Dashboard() {
         </section>
       )}
 
-      <section className="mt-8">
-        <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-muted-foreground">
-            Últimas vendas
-          </h2>
-          <Link
-            href="/historico"
-            className="text-xs font-medium text-primary hover:underline"
-          >
-            Ver tudo
-          </Link>
-        </div>
-        <Card className="border-border/70">
-          <CardContent className="divide-y divide-border p-0">
-            {latest.map((s) => (
-              <div
-                key={s.id}
-                className="flex items-center justify-between gap-3 px-4 py-3"
-              >
-                <div className="min-w-0">
-                  <div className="truncate text-sm font-medium">
-                    {s.clientName}
+      {latest.length > 0 && (
+        <section className="mt-8">
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="text-sm font-semibold text-muted-foreground">
+              Últimas vendas
+            </h2>
+            <Link
+              href="/historico"
+              className="text-xs font-medium text-primary hover:underline"
+            >
+              Ver tudo
+            </Link>
+          </div>
+          <Card className="border-border/70">
+            <CardContent className="divide-y divide-border p-0">
+              {latest.map((s) => (
+                <div
+                  key={s.id}
+                  className="flex items-center justify-between gap-3 px-4 py-3"
+                >
+                  <div className="min-w-0">
+                    <div className="truncate text-sm font-medium">
+                      {s.clientName}
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      {dateTime(s.date)}
+                    </div>
                   </div>
-                  <div className="text-xs text-muted-foreground">
-                    {dateTime(s.date)}
+                  <div className="flex items-center gap-3">
+                    <div className="text-sm font-semibold tabular-nums">
+                      {currency(s.total)}
+                    </div>
+                    <Badge
+                      variant={s.status === "PAGO" ? "secondary" : "outline"}
+                      className={
+                        s.status === "PENDENTE"
+                          ? "border-amber-500/40 text-amber-700"
+                          : ""
+                      }
+                    >
+                      {s.status === "PAGO" ? "Pago" : "Pendente"}
+                    </Badge>
                   </div>
                 </div>
-                <div className="flex items-center gap-3">
-                  <div className="text-sm font-semibold tabular-nums">
-                    {currency(s.total)}
-                  </div>
-                  <Badge
-                    variant={s.status === "PAGO" ? "secondary" : "outline"}
-                    className={
-                      s.status === "PENDENTE"
-                        ? "border-amber-500/40 text-amber-700"
-                        : ""
-                    }
-                  >
-                    {s.status === "PAGO" ? "Pago" : "Pendente"}
-                  </Badge>
-                </div>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-      </section>
+              ))}
+            </CardContent>
+          </Card>
+        </section>
+      )}
     </div>
   );
 }

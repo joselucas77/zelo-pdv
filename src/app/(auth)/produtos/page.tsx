@@ -476,8 +476,17 @@ function ProductForm({
         />
       </div>
 
+      <div className="sm:col-span-2 space-y-2">
+        <Label>Descrição</Label>
+        <Textarea
+          rows={2}
+          value={form.description}
+          onChange={(e) => updateString("description", e.target.value)}
+        />
+      </div>
+
       <div className="space-y-2">
-        <Label>Código (SKU)</Label>
+        <Label>Código (Alternativo)</Label>
         <Input
           value={form.code}
           onChange={(e) => updateString("code", e.target.value)}
@@ -509,7 +518,7 @@ function ProductForm({
           value={form.unit || ""}
           onValueChange={(value) => updateString("unit", value as string)}
         >
-          <SelectTrigger className={requiredInputClass}>
+          <SelectTrigger className="w-full">
             <SelectValue placeholder="Selecione uma unidade">
               {units.find((u) => u.abbreviation === form.unit)?.name ||
                 form.unit}
@@ -525,23 +534,13 @@ function ProductForm({
         </Select>
       </div>
 
-      <div className="sm:col-span-2 space-y-2">
-        <Label>URL da Imagem (Opcional)</Label>
-        <Label>URL da Imagem</Label>
-        <Input
-          value={form.image}
-          onChange={(e) => updateString("image", e.target.value)}
-          placeholder="https://exemplo.com/imagem.png"
-        />
-      </div>
-
-      <div className="sm:col-span-2 space-y-2">
+      <div className="space-y-2">
         <Label>Categoria</Label>
         <Select
           value={form.categoryId}
           onValueChange={(value) => updateString("categoryId", value as string)}
         >
-          <SelectTrigger className={requiredInputClass}>
+          <SelectTrigger className="w-full">
             <SelectValue placeholder="Selecione uma categoria">
               {categories.find((c) => c.id === form.categoryId)?.name}
             </SelectValue>
@@ -556,11 +555,7 @@ function ProductForm({
         </Select>
       </div>
 
-      <div className="sm:col-span-2 space-y-2">
-        <Label>
-          Preço de venda{" "}
-          <span className="text-xs text-muted-foreground">(obrigatório)</span>
-        </Label>
+      <div className="space-y-2">
         <Label>Preço de venda</Label>
         <Input
           className={requiredInputClass}
@@ -568,22 +563,22 @@ function ProductForm({
           value={rawValues.salePrice}
           onChange={(e) => handleNumericChange("salePrice", e.target.value)}
           onBlur={() => handleNumericBlur("salePrice")}
-          placeholder="0,00"
+          placeholder="00,00"
         />
       </div>
 
-      <div className="sm:col-span-2 space-y-2">
+      <div className="space-y-2">
         <Label>Preço de custo</Label>
         <Input
           inputMode="decimal"
           value={rawValues.costPrice}
           onChange={(e) => handleNumericChange("costPrice", e.target.value)}
           onBlur={() => handleNumericBlur("costPrice")}
-          placeholder="0,00"
+          placeholder="00,00"
         />
       </div>
 
-      <div className="sm:col-span-2 space-y-2">
+      <div className="space-y-2">
         <Label>Estoque atual</Label>
         <Input
           inputMode="decimal"
@@ -594,7 +589,7 @@ function ProductForm({
         />
       </div>
 
-      <div className="sm:col-span-2 space-y-2">
+      <div className="space-y-2">
         <Label>Estoque mínimo</Label>
         <Input
           inputMode="decimal"
@@ -606,13 +601,14 @@ function ProductForm({
       </div>
 
       <div className="sm:col-span-2 space-y-2">
-        <Label>Descrição</Label>
-        <Textarea
-          rows={2}
-          value={form.description}
-          onChange={(e) => updateString("description", e.target.value)}
+        <Label>URL da Imagem</Label>
+        <Input
+          value={form.image}
+          onChange={(e) => updateString("image", e.target.value)}
+          placeholder="https://exemplo.com/imagem.png"
         />
       </div>
+
       <div className="sm:col-span-2 space-y-2">
         <Label>Observações</Label>
         <Textarea
