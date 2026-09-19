@@ -68,7 +68,9 @@ export function getProductColumns({
 
       cell: ({ row }) => {
         const product = row.original;
-        const low = product.stock <= product.minStock;
+        const low =
+          (product.minStock ?? 0) > 0 &&
+          product.stock <= (product.minStock ?? 0);
 
         const hasMobileActions = hasAnyAction;
 

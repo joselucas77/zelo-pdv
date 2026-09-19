@@ -96,7 +96,7 @@ export function BarcodeScanner({
         if (o) onOpenChange(o);
       }}
     >
-      <DialogContent className="sm:max-w-md">
+      <DialogContent showCloseButton={false} className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Ler Código de Barras</DialogTitle>
           <DialogDescription>
@@ -123,9 +123,10 @@ export function BarcodeScanner({
 
         <div className="flex justify-end w-full mt-2">
           <Button
+            type="button"
             variant="outline"
-            onClick={() => {
-              stopScan();
+            onClick={async () => {
+              await stopScan();
               onOpenChange(false);
             }}
           >

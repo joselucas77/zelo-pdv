@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import {
   Dialog,
@@ -430,6 +430,24 @@ function ProductForm({
   });
 
   const [isScannerOpen, setIsScannerOpen] = useState(false);
+  const scannerClosingRef = useRef(false);
+
+  const handleScannerOpenChange = (nextOpen: boolean) => {
+    setIsScannerOpen(nextOpen);
+    if (!nextOpen) {
+      scannerClosingRef.current = true;
+      setTimeout(() => {
+        scannerClosingRef.current = false;
+      }, 400);
+    }
+  };
+
+  const handleFormOpenChange = (nextOpen: boolean) => {
+    if (!nextOpen && (isScannerOpen || scannerClosingRef.current)) {
+      return;
+    }
+    onOpenChange(nextOpen);
+  };
 
   // Atualiza um campo de texto simples
   const updateString = (k: keyof FormState, v: string) =>
@@ -644,7 +662,7 @@ function ProductForm({
   if (isMobile) {
     return (
       <>
-        <Drawer open={open} onOpenChange={onOpenChange}>
+        <Drawer open={open} onOpenChange={handleFormOpenChange}>
           <DrawerContent className="h-[90vh]">
             <DrawerHeader className="shrink-0 px-4">
               <DrawerTitle>
@@ -667,7 +685,7 @@ function ProductForm({
         </Drawer>
         <BarcodeScanner
           open={isScannerOpen}
-          onOpenChange={setIsScannerOpen}
+          onOpenChange={handleScannerOpenChange}
           onScan={(barcode) => updateString("barcode", barcode)}
         />
       </>
@@ -676,7 +694,7 @@ function ProductForm({
 
   return (
     <>
-      <Dialog open={open} onOpenChange={onOpenChange}>
+      <Dialog open={open} onOpenChange={handleFormOpenChange}>
         <DialogContent className="max-h-[92vh] overflow-y-auto sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>{isEdit ? "Editar produto" : "Adicionar"}</DialogTitle>
@@ -687,7 +705,7 @@ function ProductForm({
       </Dialog>
       <BarcodeScanner
         open={isScannerOpen}
-        onOpenChange={setIsScannerOpen}
+        onOpenChange={handleScannerOpenChange}
         onScan={(barcode) => updateString("barcode", barcode)}
       />
     </>

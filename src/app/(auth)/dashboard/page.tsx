@@ -98,7 +98,9 @@ export default function Dashboard() {
     const pending = sales
       .filter((s) => s.status === "PENDENTE")
       .reduce((sum, s) => sum + Number(s.total), 0);
-    const low = products.filter((p) => p.stock <= (p.minStock ?? 0));
+    const low = products.filter(
+      (p) => (p.minStock ?? 0) > 0 && p.stock <= (p.minStock ?? 0)
+    );
     return { soldToday, pending, low };
   }, [sales, products]);
 
@@ -163,7 +165,7 @@ export default function Dashboard() {
         />
       </div>
 
-      {stats.low.length > 0 && (
+      {products.length > 0 && stats.low.length > 0 && (
         <section className="mt-8">
           <h2 className="mb-3 text-sm font-semibold text-muted-foreground">
             Produtos com estoque baixo

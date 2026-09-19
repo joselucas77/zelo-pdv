@@ -605,24 +605,20 @@ export default function NovaVenda() {
                       onClick={() => setStep("review")}
                       size="lg"
                       className="rounded-full"
-                      disabled={saving}
+                      disabled={isFinalizing}
                     >
                       Voltar
                     </Button>
                     <Button
                       size="lg"
                       className="flex-1 rounded-full"
-                      onClick={finishSale}
-                      disabled={saving || !client}
+                      onClick={finalize}
+                      disabled={isFinalizing || !can("nova-venda", "Adicionar")}
                     >
-                      {saving ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />{" "}
-                          Salvando...
-                        </>
-                      ) : (
-                        `Confirmar venda (${currency(total)})`
-                      )}
+                      <Check className="mr-2 h-4 w-4" />
+                      {isFinalizing
+                        ? "Salvando..."
+                        : `Confirmar · ${currency(total)}`}
                     </Button>
                   </div>
                 )}
