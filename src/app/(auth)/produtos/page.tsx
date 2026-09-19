@@ -29,6 +29,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { GlobalLoader } from "@/components/ui/global-loader";
+import { LoadingButton } from "@/components/ui/loading-button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { getProductColumns, ProductFrontend } from "./columns";
 import { ProductsDataTable } from "./data-table";
@@ -44,7 +46,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Category } from "@/prisma/client";
-import { Loader2, ScanBarcode } from "lucide-react";
+import { Loader2, ScanBarcode, Wand2, AlertCircle } from "lucide-react";
 import { usePermissions } from "@/components/auth/permissions-provider";
 import { BarcodeScanner } from "@/components/barcode-scanner";
 
@@ -136,12 +138,7 @@ export default function ProdutosPage() {
   );
 
   if (loading) {
-    return (
-      <div className="flex h-[60vh] w-full flex-col items-center justify-center gap-4 text-muted-foreground">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        <p className="text-sm font-medium">Carregando dados dos produtos...</p>
-      </div>
-    );
+    return <GlobalLoader />;
   }
 
   return (
@@ -185,8 +182,10 @@ export default function ProdutosPage() {
               }
         }
         isEdit={!!editing}
+        productId={editing?.id}
         categories={categories}
         units={units}
+        products={products}
         onSubmit={async (data) => {
           try {
             if (editing) {
@@ -275,6 +274,8 @@ function DeleteProduct({
   onClose: () => void;
   onConfirm: (id: string) => Promise<void>;
 }) {
+  const [busy, setBusy] = useState(false);
+
   return (
     <AlertDialog open={!!product} onOpenChange={(open) => !open && onClose()}>
       <AlertDialogContent>
@@ -290,15 +291,21 @@ function DeleteProduct({
         <AlertDialogFooter>
           <AlertDialogCancel>Cancelar</AlertDialogCancel>
 
-          <AlertDialogAction
+          <LoadingButton
+            loading={busy}
             onClick={async () => {
               if (!product) return;
 
-              await onConfirm(product.id);
+              setBusy(true);
+              try {
+                await onConfirm(product.id);
+              } finally {
+                setBusy(false);
+              }
             }}
           >
             Remover
-          </AlertDialogAction>
+          </LoadingButton>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
@@ -316,6 +323,7 @@ function StockEntry({
 }) {
   const [qty, setQty] = useState(1);
   const [rawQty, setRawQty] = useState("1");
+  const [busy, setBusy] = useState(false);
 
   const handleQtyChange = (value: string) => {
     // Remove zeros iniciais (ex: "01" → "1")
@@ -365,11 +373,13 @@ function StockEntry({
             Cancelar
           </Button>
 
-          <Button
+          <LoadingButton
+            loading={busy}
             disabled={qty <= 0}
             onClick={async () => {
               if (!product || qty <= 0) return;
 
+              setBusy(true);
               try {
                 const updatedProduct = await productsService.addStock(
                   product.id,
@@ -390,15 +400,46 @@ function StockEntry({
                     : "Erro ao adicionar estoque.";
 
                 toast.error(message);
+              } finally {
+                setBusy(false);
               }
             }}
           >
             Adicionar
-          </Button>
+          </LoadingButton>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
+}
+
+function isValidEAN13(barcode: string): boolean {
+  if (!/^\d{13}$/.test(barcode)) return false;
+
+  let sum = 0;
+  for (let i = 0; i < 12; i++) {
+    sum += parseInt(barcode[i], 10) * (i % 2 === 0 ? 1 : 3);
+  }
+
+  const checkDigit = (10 - (sum % 10)) % 10;
+  return checkDigit === parseInt(barcode[12], 10);
+}
+
+function generateInternalBarcode(): string {
+  const prefix = "200"; // Uso interno
+  let randomPart = "";
+  for (let i = 0; i < 9; i++) {
+    randomPart += Math.floor(Math.random() * 10).toString();
+  }
+  const base = prefix + randomPart;
+
+  let sum = 0;
+  for (let i = 0; i < 12; i++) {
+    sum += parseInt(base[i], 10) * (i % 2 === 0 ? 1 : 3);
+  }
+
+  const checkDigit = (10 - (sum % 10)) % 10;
+  return base + checkDigit.toString();
 }
 
 function ProductForm({
@@ -408,6 +449,8 @@ function ProductForm({
   isEdit,
   categories,
   units,
+  productId,
+  products,
   onSubmit,
 }: {
   open: boolean;
@@ -416,18 +459,66 @@ function ProductForm({
   isEdit: boolean;
   categories: Category[];
   units: Unit[];
+  productId?: string;
+  products: ProductFrontend[];
   onSubmit: (data: FormState) => Promise<void>;
 }) {
   const isMobile = useIsMobile();
   const [form, setForm] = useState<FormState>(initial);
   const [busy, setBusy] = useState(false);
-  // Guardamos os valores dos campos numéricos como string durante a digitação
   const [rawValues, setRawValues] = useState<Record<string, string>>({
     costPrice: initial.costPrice === 0 ? "" : String(initial.costPrice),
     salePrice: initial.salePrice === 0 ? "" : String(initial.salePrice),
     stock: initial.stock === 0 ? "" : String(initial.stock),
     minStock: initial.minStock === 0 ? "" : String(initial.minStock),
   });
+
+  const DRAFT_KEY = "@zelo-pdv/new-product-draft";
+
+  useEffect(() => {
+    if (open) {
+      if (isEdit) {
+        setForm(initial);
+        setRawValues({
+          costPrice: initial.costPrice === 0 ? "" : String(initial.costPrice),
+          salePrice: initial.salePrice === 0 ? "" : String(initial.salePrice),
+          stock: initial.stock === 0 ? "" : String(initial.stock),
+          minStock: initial.minStock === 0 ? "" : String(initial.minStock),
+        });
+      } else {
+        const draft = localStorage.getItem(DRAFT_KEY);
+        if (draft) {
+          try {
+            const parsed = JSON.parse(draft);
+            setForm(parsed);
+            setRawValues({
+              costPrice: parsed.costPrice === 0 ? "" : String(parsed.costPrice),
+              salePrice: parsed.salePrice === 0 ? "" : String(parsed.salePrice),
+              stock: parsed.stock === 0 ? "" : String(parsed.stock),
+              minStock: parsed.minStock === 0 ? "" : String(parsed.minStock),
+            });
+          } catch (e) {
+            setForm(initial);
+          }
+        } else {
+          setForm(initial);
+          setRawValues({
+            costPrice: initial.costPrice === 0 ? "" : String(initial.costPrice),
+            salePrice: initial.salePrice === 0 ? "" : String(initial.salePrice),
+            stock: initial.stock === 0 ? "" : String(initial.stock),
+            minStock: initial.minStock === 0 ? "" : String(initial.minStock),
+          });
+        }
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, isEdit]);
+
+  useEffect(() => {
+    if (open && !isEdit) {
+      localStorage.setItem(DRAFT_KEY, JSON.stringify(form));
+    }
+  }, [form, open, isEdit]);
 
   const [isScannerOpen, setIsScannerOpen] = useState(false);
   const scannerClosingRef = useRef(false);
@@ -455,13 +546,21 @@ function ProductForm({
 
   // Para campos numéricos: mantém o rawValue durante digitação e só commita um número válido
   const handleNumericChange = (k: keyof FormState, raw: string) => {
-    // Aceita vírgula e ponto como separador decimal, normaliza para ponto
-    const normalized = raw.replace(",", ".");
-    setRawValues((prev) => ({ ...prev, [k]: raw }));
+    // Permite apenas números, vírgula e ponto
+    const sanitized = raw.replace(/[^0-9.,]/g, "");
+    
+    // Evita múltiplas vírgulas/pontos mantendo apenas o primeiro
+    const parts = sanitized.replace(",", ".").split(".");
+    const normalized = parts[0] + (parts.length > 1 ? "." + parts.slice(1).join("") : "");
+
+    const displayRaw = sanitized;
+
+    setRawValues((prev) => ({ ...prev, [k]: displayRaw }));
+    
     const num = parseFloat(normalized);
     if (!isNaN(num) && num >= 0) {
       setForm((f) => ({ ...f, [k]: num }));
-    } else if (normalized === "" || normalized === "." || normalized === ",") {
+    } else if (normalized === "" || normalized === ".") {
       setForm((f) => ({ ...f, [k]: 0 }));
     }
   };
@@ -472,12 +571,60 @@ function ProductForm({
     setRawValues((prev) => ({ ...prev, [k]: num === 0 ? "" : String(num) }));
   };
 
+  const handleBarcodeChange = (raw: string) => {
+    // Apenas números, max 13 caracteres
+    const sanitized = raw.replace(/[^0-9]/g, "").slice(0, 13);
+    updateString("barcode", sanitized);
+  };
+
+  const handleBarcodeValidation = async (code: string) => {
+    if (!code) return;
+
+    // 1. Checar duplicidade local
+    const isDuplicate = products.some(
+      (p) => p.barcode === code && (!isEdit || p.id !== productId)
+    );
+
+    if (isDuplicate) {
+      toast.error("Este código de barras já está cadastrado em outro produto!");
+      return;
+    }
+
+    // 2. Tentar buscar nome em API caso seja um EAN-13
+    if (isValidEAN13(code)) {
+      try {
+        const res = await fetch(`https://world.openfoodfacts.org/api/v0/product/${code}.json`);
+        const data = await res.json();
+        
+        if (data.status === 1 && data.product && data.product.product_name) {
+          toast.success("Nome do produto preenchido automaticamente pela base mundial!");
+          setForm((prev) => ({
+            ...prev,
+            name: prev.name.length < 2 ? data.product.product_name : prev.name,
+            image: !prev.image && data.product.image_url ? data.product.image_url : prev.image,
+          }));
+        }
+      } catch (error) {
+        // Se a API externa falhar, não atrapalha o usuário
+      }
+    }
+  };
+
+  const barcodeExists =
+    form.barcode.length > 0 &&
+    products.some(
+      (p) =>
+        p.barcode === form.barcode &&
+        (!isEdit || p.id !== productId)
+    );
+
   // Validação dos campos obrigatórios
   const canSave =
     form.name.trim().length >= 2 &&
     form.categoryId.trim() !== "" &&
     form.unit.trim() !== "" &&
-    (form.salePrice as number) > 0;
+    (form.salePrice as number) > 0 &&
+    !barcodeExists;
 
   const requiredInputClass =
     "border-primary/50 focus:ring-primary/50 bg-primary/[0.03]";
@@ -516,8 +663,26 @@ function ProductForm({
         <div className="flex gap-2">
           <Input
             value={form.barcode}
-            onChange={(e) => updateString("barcode", e.target.value)}
+            onChange={(e) => handleBarcodeChange(e.target.value)}
+            onBlur={() => handleBarcodeValidation(form.barcode)}
+            className={
+              barcodeExists ? "border-red-500 focus-visible:ring-red-500" : ""
+            }
           />
+          <Button
+            type="button"
+            variant="outline"
+            size="icon"
+            title="Gerar código interno"
+            className="shrink-0"
+            onClick={() => {
+              const generated = generateInternalBarcode();
+              updateString("barcode", generated);
+              handleBarcodeValidation(generated);
+            }}
+          >
+            <Wand2 className="w-4 h-4 text-blue-500" />
+          </Button>
           <Button
             type="button"
             variant="outline"
@@ -528,6 +693,11 @@ function ProductForm({
             <ScanBarcode className="w-4 h-4" />
           </Button>
         </div>
+        {barcodeExists && (
+          <p className="text-xs text-red-500 flex items-center gap-1 mt-1">
+            <AlertCircle className="w-3 h-3" /> Código de barras já existe em outro produto.
+          </p>
+        )}
       </div>
 
       <div className="space-y-2">
@@ -643,19 +813,23 @@ function ProductForm({
       <Button variant="outline" onClick={() => onOpenChange(false)}>
         Cancelar
       </Button>
-      <Button
+      <LoadingButton
+        loading={busy}
         disabled={busy || !canSave}
         onClick={async () => {
           setBusy(true);
           try {
             await onSubmit(form);
+            if (!isEdit) {
+              localStorage.removeItem("@zelo-pdv/new-product-draft");
+            }
           } finally {
             setBusy(false);
           }
         }}
       >
         Salvar
-      </Button>
+      </LoadingButton>
     </div>
   );
 
@@ -686,7 +860,11 @@ function ProductForm({
         <BarcodeScanner
           open={isScannerOpen}
           onOpenChange={handleScannerOpenChange}
-          onScan={(barcode) => updateString("barcode", barcode)}
+          onScan={(barcode) => {
+            const sanitized = barcode.replace(/[^0-9]/g, "").slice(0, 13);
+            updateString("barcode", sanitized);
+            handleBarcodeValidation(sanitized);
+          }}
         />
       </>
     );
@@ -706,7 +884,11 @@ function ProductForm({
       <BarcodeScanner
         open={isScannerOpen}
         onOpenChange={handleScannerOpenChange}
-        onScan={(barcode) => updateString("barcode", barcode)}
+        onScan={(barcode) => {
+          const sanitized = barcode.replace(/[^0-9]/g, "").slice(0, 13);
+          updateString("barcode", sanitized);
+          handleBarcodeValidation(sanitized);
+        }}
       />
     </>
   );

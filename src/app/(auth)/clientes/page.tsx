@@ -6,6 +6,7 @@ import { Loader2 } from "lucide-react"; // Ícone de loading
 import { clientsService } from "@/services/clients.service";
 import { salesService } from "@/services/sales.service";
 import { getClientColumns } from "./columns";
+import { GlobalLoader } from "@/components/ui/global-loader";
 import { ClientsDataTable } from "./data-table";
 import { ClientForm } from "@/components/clients/client-form";
 import ClientDetail from "@/components/clients/client-detail";
@@ -82,12 +83,7 @@ export default function ClientesPage() {
 
   // Tela de Loading enquanto os dados são buscados
   if (isLoading) {
-    return (
-      <div className="flex h-[60vh] w-full flex-col items-center justify-center gap-4 text-muted-foreground">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        <p className="text-sm font-medium">Carregando dados dos clientes...</p>
-      </div>
-    );
+    return <GlobalLoader />;
   }
 
   if (!can("clientes", "Visualizar")) {

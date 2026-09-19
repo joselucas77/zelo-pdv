@@ -12,6 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { GlobalLoader } from "@/components/ui/global-loader";
 import { SaleVoucher } from "@/components/sale-voucher";
 import { useVouchersStore, voucherCode } from "@/store/useVouchersStore";
 import { currency, dateTime } from "@/lib/format";
@@ -80,12 +81,7 @@ export default function HistoricoPage() {
   );
 
   if (isLoading) {
-    return (
-      <div className="flex h-[60vh] w-full flex-col items-center justify-center gap-4 text-muted-foreground">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        <p className="text-sm font-medium">Carregando histórico de vendas...</p>
-      </div>
-    );
+    return <GlobalLoader />;
   }
 
   if (!can("historico", "Visualizar")) {

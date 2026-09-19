@@ -10,6 +10,8 @@ import {
   Save,
 } from "lucide-react";
 import { toast } from "sonner";
+import { GlobalLoader } from "@/components/ui/global-loader";
+import { LoadingButton } from "@/components/ui/loading-button";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -185,13 +187,7 @@ function StoreSection() {
   };
 
   if (loading) {
-    return (
-      <Card className="mb-4">
-        <CardContent className="p-8 text-center text-sm text-muted-foreground">
-          Carregando dados da loja...
-        </CardContent>
-      </Card>
-    );
+    return <GlobalLoader />;
   }
 
   const requiredInputClass =
@@ -271,10 +267,13 @@ function StoreSection() {
             >
               Cancelar
             </Button>
-            <Button disabled={!canSave} onClick={handleSave}>
-              <Save className="mr-1 h-4 w-4" />
-              {busy ? "Salvando..." : "Salvar"}
-            </Button>
+            <LoadingButton
+              onClick={handleSave}
+              disabled={!canSave}
+              loading={busy}
+            >
+              Salvar
+            </LoadingButton>
           </div>
         </div>
       </CardContent>
@@ -351,9 +350,7 @@ function GroupsSection() {
       </CardHeader>
       <CardContent className="space-y-2">
         {loading ? (
-          <div className="p-8 text-center text-sm text-muted-foreground">
-            Carregando grupos...
-          </div>
+          <GlobalLoader />
         ) : groups.length === 0 ? (
           <div className="rounded-xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
             Nenhum grupo cadastrado.
@@ -884,7 +881,7 @@ function ProductsConfigSection() {
 
       <CardContent className="space-y-6">
         {loading ? (
-          <p className="text-sm text-muted-foreground">Carregando...</p>
+          <GlobalLoader />
         ) : (
           <div className="grid md:grid-cols-2 gap-6">
             {/* Categorias */}

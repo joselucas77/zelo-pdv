@@ -33,6 +33,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { GlobalLoader } from "@/components/ui/global-loader";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Select,
@@ -175,12 +176,7 @@ export default function UsuariosPage() {
   );
 
   if (isLoading) {
-    return (
-      <div className="flex h-[60vh] w-full flex-col items-center justify-center gap-4 text-muted-foreground">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        <p className="text-sm font-medium">Carregando usuários...</p>
-      </div>
-    );
+    return <GlobalLoader />;
   }
 
   return (

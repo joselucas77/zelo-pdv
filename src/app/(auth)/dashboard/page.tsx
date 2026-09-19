@@ -12,6 +12,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { currency, dateTime, isToday } from "@/lib/format";
 import Link from "next/link";
+import { GlobalLoader } from "@/components/ui/global-loader";
 import { salesService } from "@/services/sales.service";
 import { productsService } from "@/services/products.service";
 import type { Sale } from "@/types";
@@ -114,12 +115,7 @@ export default function Dashboard() {
   const latest = sortedSales.slice(0, 5);
 
   if (isLoading) {
-    return (
-      <div className="flex h-[60vh] w-full flex-col items-center justify-center gap-4 text-muted-foreground">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        <p className="text-sm font-medium">Carregando dashboard...</p>
-      </div>
-    );
+    return <GlobalLoader />;
   }
 
   if (!can("dashboard", "Visualizar")) {
