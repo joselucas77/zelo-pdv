@@ -62,6 +62,20 @@ export default function HistoricoPage() {
     phone?: string;
   } | null>(null);
 
+  useEffect(() => {
+    if (sales.length > 0 && typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const saleId = params.get("saleId");
+      if (saleId) {
+        const found = sales.find((s) => s.id === saleId);
+        if (found) {
+          setDetail(found);
+        }
+        window.history.replaceState(null, "", "/historico");
+      }
+    }
+  }, [sales]);
+
   const columns = useMemo(
     () =>
       getSaleColumns({

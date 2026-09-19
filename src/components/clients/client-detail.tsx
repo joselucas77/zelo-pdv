@@ -29,10 +29,10 @@ export default function ClientDetail({
     .filter((s) => s.clientId === client.id)
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
-  const total = clientSales.reduce((s, v) => s + v.total, 0);
+  const total = clientSales.reduce((s, v) => s + Number(v.total), 0);
   const pending = clientSales
     .filter((s) => s.status === "PENDENTE")
-    .reduce((s, v) => s + v.total, 0);
+    .reduce((s, v) => s + Number(v.total), 0);
   const last = clientSales[0]?.date;
 
   // Conteúdo compartilhado entre Desktop e Mobile
@@ -83,16 +83,17 @@ export default function ClientDetail({
         ) : (
           <div className="space-y-1">
             {clientSales.slice(0, 8).map((v) => (
-              <div
+              <Link
                 key={v.id}
-                className="flex items-center justify-between rounded-lg border border-border/60 px-3 py-2 text-sm"
+                href={`/historico?saleId=${v.id}`}
+                className="flex items-center justify-between rounded-lg border border-border/60 px-3 py-2 text-sm hover:bg-muted/50 transition-colors block"
               >
                 <div className="text-xs text-muted-foreground">
                   {dateTime(v.date)}
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="font-semibold tabular-nums">
-                    {currency(v.total)}
+                    {currency(Number(v.total))}
                   </span>
                   <Badge
                     variant={v.status === "PAGO" ? "secondary" : "outline"}
@@ -105,7 +106,7 @@ export default function ClientDetail({
                     {v.status === "PAGO" ? "Pago" : "Pendente"}
                   </Badge>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         )}
@@ -121,7 +122,7 @@ export default function ClientDetail({
         size="sm"
         render={
           <Link
-            href={`https://wa.me/${client.phone.replace(/\D/g, "")}`}
+            href={`https://wa.me/${client.phone.replace(/\D/g, "")}?text=${encodeURIComponent(`Olá, ${client.name.split(' ')[0]}!`)}`}
             target="_blank"
             rel="noreferrer"
           >
@@ -171,7 +172,7 @@ export default function ClientDetail({
               size="sm"
               render={
                 <Link
-                  href={`https://wa.me/${client.phone.replace(/\D/g, "")}`}
+                  href={`https://wa.me/${client.phone.replace(/\D/g, "")}?text=${encodeURIComponent(`Olá, ${client.name.split(' ')[0]}!`)}`}
                   target="_blank"
                   rel="noreferrer"
                 >

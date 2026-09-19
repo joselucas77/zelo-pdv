@@ -79,7 +79,9 @@ export function ClientsDataTable({
             placeholder="Buscar por nome, telefone..."
             value={globalFilter}
             onChange={(e) => setGlobalFilter(e.target.value)}
-            autoComplete="off"
+            autoComplete="new-password"
+            name="search-table"
+            id="search-table"
             className="rounded-xl pl-9"
           />
         </div>

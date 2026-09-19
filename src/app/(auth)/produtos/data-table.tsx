@@ -98,9 +98,12 @@ export function ProductsDataTable({
           <div className="relative flex-1 min-w-0">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
-              placeholder="Buscar produto ou categoria..."
+              placeholder="Buscar produtos (código, nome, código de barras)..."
               value={globalFilter}
               onChange={(e) => setGlobalFilter(e.target.value)}
+              autoComplete="new-password"
+              name="search-table"
+              id="search-table"
               className="rounded-xl pl-9"
             />
           </div>

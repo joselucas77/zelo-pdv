@@ -21,6 +21,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { LoadingButton } from "@/components/ui/loading-button";
 import { Client } from "@/prisma/client";
 import { ClientWithAddress } from "@/types";
 
@@ -99,15 +100,21 @@ export function ClientForm({
   const isMobile = useIsMobile();
 
   const getInitialState = useCallback(
-    (): ClientFormData => ({
-      name: initial?.name || "",
-      phone: initial?.phone || "",
-      email: initial?.email || "",
-      address: parseInitialAddress(initial?.address),
-      notes: initial?.notes || "",
-      createdAt: initial?.createdAt || new Date(),
-      updatedAt: initial?.updatedAt || new Date(),
-    }),
+    (): ClientFormData => {
+      let initialPhone = initial?.phone || "";
+      if (initialPhone.startsWith("+55")) {
+        initialPhone = initialPhone.replace(/^\+55/, "");
+      }
+      return {
+        name: initial?.name || "",
+        phone: initialPhone,
+        email: initial?.email || "",
+        address: parseInitialAddress(initial?.address),
+        notes: initial?.notes || "",
+        createdAt: initial?.createdAt || new Date(),
+        updatedAt: initial?.updatedAt || new Date(),
+      };
+    },
     [initial],
   );
 
@@ -161,20 +168,62 @@ export function ClientForm({
     }
   };
 
+  const DRAFT_KEY = "@zelo-pdv/new-client-draft";
+
   useEffect(() => {
     if (open) {
-      setForm(getInitialState());
+      if (isEdit) {
+        setForm(getInitialState());
+      } else {
+        const draft = localStorage.getItem(DRAFT_KEY);
+        if (draft) {
+          try {
+            setForm(JSON.parse(draft));
+          } catch (e) {
+            setForm(getInitialState());
+          }
+        } else {
+          setForm(getInitialState());
+        }
+      }
     }
-  }, [open, getInitialState]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, isEdit]);
+
+  useEffect(() => {
+    if (open && !isEdit) {
+      localStorage.setItem(DRAFT_KEY, JSON.stringify(form));
+    }
+  }, [form, open, isEdit]);
 
   const submit = async () => {
+    // E-mail validation
+    if (form.email && form.email.trim() !== "") {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(form.email)) {
+        toast.error("Por favor, insira um e-mail válido.");
+        return;
+      }
+    }
+
     setLoading(true);
-    await onSubmit({
-      ...form,
-      email: form.email?.trim() === "" ? null : form.email,
-      address: form.address,
-    });
-    setLoading(false);
+    try {
+      const phoneToSave =
+        form.phone && form.phone.trim() !== "" ? `+55${form.phone}` : null;
+
+      await onSubmit({
+        ...form,
+        phone: phoneToSave,
+        email: form.email?.trim() === "" ? null : form.email,
+        address: form.address,
+      });
+
+      if (!isEdit) {
+        localStorage.removeItem(DRAFT_KEY);
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   const requiredInputClass =
@@ -198,7 +247,11 @@ export function ClientForm({
           <Input
             className={requiredInputClass}
             value={form.phone ?? ""}
-            onChange={(e) => setForm({ ...form, phone: e.target.value })}
+            onChange={(e) => {
+              // Permitir apenas números
+              const onlyNumbers = e.target.value.replace(/\D/g, "");
+              setForm({ ...form, phone: onlyNumbers });
+            }}
             placeholder="(00) 00000-0000"
             autoComplete="off"
           />
@@ -359,12 +412,13 @@ export function ClientForm({
       >
         Cancelar
       </Button>
-      <Button
+      <LoadingButton
+        loading={loading}
         disabled={form.name.trim().length < 2 || loading}
         onClick={submit}
       >
-        {loading ? "Salvando..." : "Salvar"}
-      </Button>
+        Salvar
+      </LoadingButton>
     </div>
   );
 
