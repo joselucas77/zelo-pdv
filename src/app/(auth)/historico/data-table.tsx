@@ -95,16 +95,18 @@ export function SalesDataTable({
           </div>
 
           <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant={statusFilter !== "Todas" ? "default" : "outline"}
-                size="icon"
-                className="rounded-xl shrink-0"
-                aria-label="Filtrar status"
-              >
-                <ListFilter className="h-4 w-4" />
-              </Button>
-            </PopoverTrigger>
+            <PopoverTrigger
+              render={
+                <Button
+                  variant={statusFilter !== "Todas" ? "default" : "outline"}
+                  size="icon"
+                  className="rounded-xl shrink-0"
+                  aria-label="Filtrar status"
+                >
+                  <ListFilter className="h-4 w-4" />
+                </Button>
+              }
+            ></PopoverTrigger>
             <PopoverContent align="end" className="w-48 p-1">
               <div className="flex flex-col gap-0.5">
                 <Button
