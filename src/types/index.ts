@@ -59,6 +59,7 @@ export interface Client {
 export interface Product {
   id: string;
   code?: string | null;
+  barcode?: string | null;
   name: string;
   salePrice: number | string;
   stock: number;

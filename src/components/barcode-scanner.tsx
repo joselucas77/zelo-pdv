@@ -15,19 +15,23 @@ interface BarcodeScannerProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onScan: (barcode: string) => void;
+  continuous?: boolean;
 }
 
 export function BarcodeScanner({
   open,
   onOpenChange,
   onScan,
+  continuous = false,
 }: BarcodeScannerProps) {
   const [isScanning, setIsScanning] = useState(false);
   const [error, setError] = useState("");
   const scannerRef = useRef<Html5Qrcode | null>(null);
+  const lastScannedRef = useRef<{ text: string; time: number } | null>(null);
 
   const startScan = async () => {
     setError("");
+    lastScannedRef.current = null;
 
     try {
       if (!scannerRef.current) {
@@ -42,9 +46,20 @@ export function BarcodeScanner({
         },
         (decodedText) => {
           if (decodedText && decodedText.trim() !== "") {
-            onScan(decodedText);
-            stopScan();
-            onOpenChange(false);
+            if (continuous) {
+              const now = Date.now();
+              const last = lastScannedRef.current;
+              // Prevent scanning the same barcode multiple times within 2 seconds
+              if (last && last.text === decodedText && now - last.time < 2000) {
+                return;
+              }
+              lastScannedRef.current = { text: decodedText, time: now };
+              onScan(decodedText);
+            } else {
+              onScan(decodedText);
+              stopScan();
+              onOpenChange(false);
+            }
           }
         },
         (errorMessage) => {

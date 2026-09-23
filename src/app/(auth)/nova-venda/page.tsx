@@ -364,7 +364,7 @@ export default function NovaVenda() {
       )}
 
       {/* Summary bar */}
-      <div className="fixed inset-x-0 bottom-16 z-30 border-t border-border bg-background/95 backdrop-blur-lg md:sticky md:bottom-0 md:left-64 md:mt-6 md:rounded-2xl md:border md:bg-card md:shadow-sm">
+      <div className="fixed inset-x-0 bottom-16 z-30 border-t border-border bg-background/95 backdrop-blur-lg md:sticky md:bottom-0 md:left-64 md:mt-1 md:rounded-2xl md:border md:bg-card md:shadow-sm">
         <div className="mx-auto flex max-w-5xl items-center justify-between gap-3 px-4 py-3 md:px-6">
           <div>
             <div className="text-xs text-muted-foreground">
