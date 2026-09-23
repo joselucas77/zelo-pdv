@@ -120,8 +120,8 @@ function StoreSection() {
           const storeData = {
             name: data.name || "",
             ownerName: firstUserName || data.ownerName || "",
-            document: data.document || "",
-            phone: data.phone || "",
+            document: data.document ? data.document.replace(/\D/g, "") : "",
+            phone: data.phone ? data.phone.replace(/^\+55/, "") : "",
             email: data.email || "",
             logo: data.logo || "",
             active: data.active ?? true,
@@ -156,7 +156,12 @@ function StoreSection() {
 
   const handleSave = async () => {
     // 1. Validação do Zod
-    const parsed = lojaSchema.safeParse(form);
+    const dataToSave = {
+      ...form,
+      phone: form.phone ? "+55" + form.phone.replace(/\D/g, "") : "",
+      document: form.document ? form.document.replace(/\D/g, "") : "",
+    };
+    const parsed = lojaSchema.safeParse(dataToSave);
 
     if (!parsed.success) {
       toast.error(parsed.error.issues[0]?.message || "Dados inválidos");
@@ -177,7 +182,7 @@ function StoreSection() {
       }
 
       // 3. Atualiza o estado original para refletir a nova base de dados salva
-      setOriginal(form);
+      setOriginal(dataToSave);
     } catch (error: any) {
       console.error(error);
       toast.error(error.message || "Erro ao salvar os dados da loja");
@@ -226,14 +231,15 @@ function StoreSection() {
             <Label>Documento (CNPJ/CPF)</Label>
             <Input
               value={form.document || ""}
-              onChange={(e) => update("document", e.target.value)}
+              onChange={(e) => update("document", e.target.value.replace(/\D/g, ""))}
             />
           </div>
           <div className="flex flex-col gap-2">
             <Label>Telefone</Label>
             <Input
+              type="tel"
               value={form.phone || ""}
-              onChange={(e) => update("phone", e.target.value)}
+              onChange={(e) => update("phone", e.target.value.replace(/\D/g, ""))}
             />
           </div>
           <div className="flex flex-col gap-2">
@@ -691,9 +697,9 @@ function GroupForm({
           >
             Cancelar
           </Button>
-          <Button onClick={submit} disabled={!form.name.trim() || saving}>
-            {saving ? "Salvando..." : "Salvar"}
-          </Button>
+          <LoadingButton onClick={submit} disabled={!form.name.trim() || saving} loading={saving}>
+            Salvar
+          </LoadingButton>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -732,6 +738,9 @@ function ProductsConfigSection() {
     decimalPlaces: 0,
   });
 
+  const [savingCategory, setSavingCategory] = useState(false);
+  const [savingUnit, setSavingUnit] = useState(false);
+
   const fetchData = async () => {
     setLoading(true);
 
@@ -759,6 +768,7 @@ function ProductsConfigSection() {
     if (!categoryName.trim())
       return toast.error("O nome da categoria é obrigatório.");
 
+    setSavingCategory(true);
     try {
       if (editingCategory) {
         await categoriesService.update(editingCategory.id, {
@@ -777,6 +787,8 @@ function ProductsConfigSection() {
       fetchData();
     } catch (error: any) {
       toast.error(error.message || "Erro ao salvar categoria.");
+    } finally {
+      setSavingCategory(false);
     }
   };
 
@@ -815,6 +827,7 @@ function ProductsConfigSection() {
       return toast.error("Nome e sigla são obrigatórios.");
     }
 
+    setSavingUnit(true);
     try {
       const payload = {
         ...unitForm,
@@ -836,6 +849,8 @@ function ProductsConfigSection() {
       fetchData();
     } catch (error: any) {
       toast.error(error.message || "Erro ao salvar unidade.");
+    } finally {
+      setSavingUnit(false);
     }
   };
 
@@ -1035,7 +1050,9 @@ function ProductsConfigSection() {
                 Cancelar
               </Button>
 
-              <Button onClick={handleSaveCategory}>Salvar</Button>
+              <LoadingButton onClick={handleSaveCategory} loading={savingCategory}>
+                Salvar
+              </LoadingButton>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -1085,12 +1102,13 @@ function ProductsConfigSection() {
                   min="0"
                   max="3"
                   value={unitForm.decimalPlaces}
-                  onChange={(e) =>
+                  onChange={(e) => {
+                    const val = e.target.value.replace(/\D/g, "");
                     setUnitForm({
                       ...unitForm,
-                      decimalPlaces: Number(e.target.value),
-                    })
-                  }
+                      decimalPlaces: val ? Math.min(3, Number(val)) : 0,
+                    });
+                  }}
                 />
               </div>
             </div>
@@ -1103,7 +1121,9 @@ function ProductsConfigSection() {
                 Cancelar
               </Button>
 
-              <Button onClick={handleSaveUnit}>Salvar</Button>
+              <LoadingButton onClick={handleSaveUnit} loading={savingUnit}>
+                Salvar
+              </LoadingButton>
             </DialogFooter>
           </DialogContent>
         </Dialog>

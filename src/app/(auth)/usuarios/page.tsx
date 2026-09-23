@@ -30,6 +30,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
+import { LoadingButton } from "@/components/ui/loading-button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
@@ -257,11 +258,48 @@ function UserForm({
   onSuccess: (user: AppUser, isEdit: boolean) => void;
 }) {
   const isMobile = useIsMobile();
+  const DRAFT_KEY = "@zelo-pdv/new-user-draft";
+
   const [form, setForm] = useState<FormData>(emptyForm);
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const isEdit = !!initial;
+
+  // Carregar rascunho apenas na criação inicial
+  useEffect(() => {
+    if (!open) return;
+    if (initial) {
+      setForm({
+        name: initial.name,
+        email: initial.email,
+        password: "",
+        phone: initial.phone ? initial.phone.replace(/^\+55/, "") : "",
+        avatar: initial.avatar || "",
+        groupId: initial.groupId,
+        active: initial.active,
+      });
+    } else {
+      const saved = localStorage.getItem(DRAFT_KEY);
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          setForm({ ...emptyForm, ...parsed });
+        } catch {
+          setForm(emptyForm);
+        }
+      } else {
+        setForm(emptyForm);
+      }
+    }
+  }, [initial, open]);
+
+  // Salvar rascunho (somente se não for edição)
+  useEffect(() => {
+    if (open && !initial) {
+      localStorage.setItem(DRAFT_KEY, JSON.stringify(form));
+    }
+  }, [form, open, initial]);
 
   const selectableGroups = useMemo(() => {
     return groups.filter((g) => {
@@ -271,22 +309,6 @@ function UserForm({
       return true;
     });
   }, [groups, initial]);
-
-  useEffect(() => {
-    if (initial && open) {
-      setForm({
-        name: initial.name,
-        email: initial.email,
-        password: "",
-        phone: initial.phone || "",
-        avatar: initial.avatar || "",
-        groupId: initial.groupId,
-        active: initial.active,
-      });
-    } else if (!initial && open) {
-      setForm(emptyForm);
-    }
-  }, [initial, open]);
 
   const submit = async () => {
     try {
@@ -306,7 +328,7 @@ function UserForm({
           name: form.name.trim(),
           email: form.email.trim().toLowerCase(),
           password: form.password ? form.password : undefined,
-          phone: form.phone ? form.phone.trim() : undefined,
+          phone: form.phone ? "+55" + form.phone.replace(/\D/g, "") : undefined,
           avatar: form.avatar ? form.avatar.trim() : undefined,
           groupId: form.groupId,
           active: form.active,
@@ -318,12 +340,14 @@ function UserForm({
           name: form.name.trim(),
           email: form.email.trim().toLowerCase(),
           password: form.password!,
-          phone: form.phone ? form.phone.trim() : undefined,
+          phone: form.phone ? "+55" + form.phone.replace(/\D/g, "") : undefined,
           avatar: form.avatar ? form.avatar.trim() : undefined,
           groupId: form.groupId,
           active: form.active,
         });
         toast.success("Usuário criado com sucesso!");
+        localStorage.removeItem(DRAFT_KEY);
+        setForm(emptyForm);
         onSuccess(created, false);
       }
     } catch (error) {
@@ -364,7 +388,7 @@ function UserForm({
         <Input
           type="tel"
           value={form.phone || ""}
-          onChange={(e) => setForm({ ...form, phone: e.target.value })}
+          onChange={(e) => setForm({ ...form, phone: e.target.value.replace(/\D/g, "") })}
           placeholder="(11) 99999-9999"
         />
       </div>
@@ -448,10 +472,9 @@ function UserForm({
       >
         Cancelar
       </Button>
-      <Button onClick={submit} disabled={isSubmitting}>
-        {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+      <LoadingButton onClick={submit} loading={isSubmitting} className="min-w-28">
         Salvar
-      </Button>
+      </LoadingButton>
     </div>
   );
 
