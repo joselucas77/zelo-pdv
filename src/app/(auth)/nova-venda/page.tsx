@@ -308,7 +308,7 @@ export default function NovaVenda() {
       </div>
 
       {items.length === 0 ? (
-        <div className="minh-[50vh] flex-1">
+        <div className="md:min-h-[50vh] max-h-[54vh] flex-1">
           <div className="h-full w-full flex items-center justify-center rounded-xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
             Nenhum produto no carrinho.
           </div>
