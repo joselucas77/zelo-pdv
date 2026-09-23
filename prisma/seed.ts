@@ -123,6 +123,117 @@ async function main() {
   });
 
   console.log(`Usuário configurado: ${adminUser.email} (${adminUser.id})`);
+
+  // ==========================================
+  // CONTA DE DEMONSTRAÇÃO
+  // ==========================================
+
+  // 1. Criar ou atualizar a Loja "Loja Demo"
+  const demoLoja = await prisma.loja.upsert({
+    where: { name: "Loja Demo" },
+    update: {},
+    create: {
+      name: "Loja Demo",
+      ownerName: "Usuário Demo",
+      active: true,
+    },
+  });
+
+  console.log(`Loja Demo configurada: ${demoLoja.name} (${demoLoja.id})`);
+
+  // 2. Criar ou atualizar o grupo ADMIN para a Loja Demo
+  const demoAdminGroup = await prisma.accessGroup.upsert({
+    where: {
+      lojaId_name: {
+        lojaId: demoLoja.id,
+        name: "ADMIN",
+      },
+    },
+    update: {
+      permissions: {
+        dashboard: ["Visualizar"],
+        historico: ["Visualizar", "Editar", "Excluir"],
+        "nova-venda": ["Visualizar", "Adicionar"],
+        clientes: ["Visualizar", "Adicionar", "Editar", "Excluir"],
+        produtos: ["Visualizar", "Adicionar", "Editar", "Excluir"],
+        categorias: ["Visualizar", "Adicionar", "Editar", "Excluir"],
+        configuracoes: ["Visualizar", "Editar", "Excluir"],
+        usuarios: ["Visualizar", "Adicionar", "Editar", "Excluir"],
+      },
+    },
+    create: {
+      lojaId: demoLoja.id,
+      name: "ADMIN",
+      description: "Administrador da Demo (Acesso Total)",
+      active: true,
+      permissions: {
+        dashboard: ["Visualizar"],
+        historico: ["Visualizar", "Editar", "Excluir"],
+        "nova-venda": ["Visualizar", "Adicionar"],
+        clientes: ["Visualizar", "Adicionar", "Editar", "Excluir"],
+        produtos: ["Visualizar", "Adicionar", "Editar", "Excluir"],
+        categorias: ["Visualizar", "Adicionar", "Editar", "Excluir"],
+        configuracoes: ["Visualizar", "Editar", "Excluir"],
+        usuarios: ["Visualizar", "Adicionar", "Editar", "Excluir"],
+      },
+    },
+  });
+
+  for (const unit of defaultUnits) {
+    await prisma.unit.upsert({
+      where: {
+        lojaId_abbreviation: {
+          lojaId: demoLoja.id,
+          abbreviation: unit.abbreviation,
+        },
+      },
+      update: {},
+      create: {
+        lojaId: demoLoja.id,
+        name: unit.name,
+        abbreviation: unit.abbreviation,
+        decimalPlaces: unit.decimalPlaces,
+      },
+    });
+  }
+
+  await prisma.category.upsert({
+    where: {
+      lojaId_name: {
+        lojaId: demoLoja.id,
+        name: "Diversos",
+      },
+    },
+    update: {},
+    create: {
+      lojaId: demoLoja.id,
+      name: "Diversos",
+    },
+  });
+
+  const demoEmail = "demo@zelopdv.com";
+  const demoPassword = "demo";
+  const demoHashedPassword = await bcrypt.hash(demoPassword, 10);
+
+  const demoUser = await prisma.user.upsert({
+    where: { email: demoEmail },
+    update: {
+      password: demoHashedPassword,
+      groupId: demoAdminGroup.id,
+      lojaId: demoLoja.id,
+    },
+    create: {
+      lojaId: demoLoja.id,
+      name: "Administrador Demo",
+      email: demoEmail,
+      password: demoHashedPassword,
+      active: true,
+      groupId: demoAdminGroup.id,
+    },
+  });
+
+  console.log(`Usuário demo configurado: ${demoUser.email} (${demoUser.id})`);
+
   console.log("Seed finalizado com sucesso!");
 }
 
