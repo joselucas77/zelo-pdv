@@ -1,4 +1,4 @@
-import { requireAuth } from "@/lib/proxy";
+import { requireAuth } from "../../../proxy";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/layout/app-sidebar";
 import { SiteHeader } from "@/components/layout/site-header";

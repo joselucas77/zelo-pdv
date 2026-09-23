@@ -86,7 +86,7 @@ export default function ClientDetail({
               <Link
                 key={v.id}
                 href={`/historico?saleId=${v.id}`}
-                className="flex items-center justify-between rounded-lg border border-border/60 px-3 py-2 text-sm hover:bg-muted/50 transition-colors block"
+                className="flex items-center justify-between rounded-lg border border-border/60 px-3 py-2 text-sm hover:bg-muted/50 transition-colors"
               >
                 <div className="text-xs text-muted-foreground">
                   {dateTime(v.date)}

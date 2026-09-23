@@ -1,4 +1,4 @@
-import { requireGuest } from "@/lib/proxy";
+import { requireGuest } from "../../../proxy";
 import { LoginForm } from "./login-form";
 
 export default async function LoginPage() {
