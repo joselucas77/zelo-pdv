@@ -238,10 +238,10 @@ export default function NovaVenda() {
   return (
     <div className="w-full h-[86vh] flex flex-col px-4">
       <Card
-        className="mb-3 min-h-24 cursor-pointer border-border/70 transition hover:border-primary/40"
+        className="mb-3 h-18.5 cursor-pointer border-border/70 transition hover:border-primary/40"
         onClick={() => setClientPicker(true)}
       >
-        <CardContent className="flex items-center gap-3 p-3">
+        <CardContent className="flex items-center gap-2">
           {client ? (
             <>
               <Avatar className="h-11 w-11">
@@ -308,7 +308,7 @@ export default function NovaVenda() {
       </div>
 
       {items.length === 0 ? (
-        <div className="md:min-h-[50vh] max-h-[54vh] flex-1">
+        <div className="md:min-h-[50vh] max-h-[42vh] flex-1">
           <div className="h-full w-full flex items-center justify-center rounded-xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
             Nenhum produto no carrinho.
           </div>
