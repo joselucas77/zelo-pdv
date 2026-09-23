@@ -5,7 +5,7 @@ import prisma from "@/lib/prisma";
 import { loginSchema } from "@/lib/validations/auth";
 import bcrypt from "bcryptjs";
 import { withValidation } from "../../../../../proxy";
-import { z } from "zod";
+
 
 const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET);
 

@@ -83,7 +83,7 @@ export async function PATCH(
       });
     }
 
-    const { password, ...safeUser } = user;
+    const { password: _password, ...safeUser } = user;
 
     return NextResponse.json(safeUser);
   } catch (error) {

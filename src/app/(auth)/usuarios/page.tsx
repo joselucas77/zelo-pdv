@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { ArrowLeft, Eye, EyeOff, Loader2, Plus } from "lucide-react";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import Link from "next/link";
+
 import { cn } from "@/lib/utils";
 import { z } from "zod";
 import {
@@ -44,7 +44,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { getUserColumns, type UserTableData } from "./columns";
+import { getUserColumns} from "./columns";
 import { UsersDataTable } from "./data-table";
 
 // Serviços
@@ -165,7 +165,7 @@ export default function UsuariosPage() {
             if (currentUser && updated.id === currentUser.sub) {
               window.location.reload();
             }
-          } catch (error) {
+          } catch {
             toast.error("Erro ao atualizar status.");
           }
         },
@@ -478,7 +478,7 @@ function UserForm({
           </DrawerHeader>
           <div className="flex min-h-0 flex-1 flex-col px-4 pb-6 overflow-hidden">
             <div className="flex-1 min-h-0 overflow-hidden">
-              <ScrollArea className="h-full **:data-radix-scroll-area-thumb:hidden pr-4">
+              <ScrollArea className="h-full">
                 <div className="pb-4">{FormFields}</div>
               </ScrollArea>
             </div>

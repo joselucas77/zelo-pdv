@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react"; // Ícone de loading
+
 import { clientsService } from "@/services/clients.service";
 import { salesService } from "@/services/sales.service";
 import { getClientColumns } from "./columns";

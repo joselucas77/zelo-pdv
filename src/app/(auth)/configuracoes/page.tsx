@@ -742,7 +742,7 @@ function ProductsConfigSection() {
       ]);
       setCategories((cats as any[]) || []);
       setUnits((uns as any[]) || []);
-    } catch (error) {
+    } catch {
       toast.error("Erro ao carregar configurações de produtos.");
     } finally {
       setLoading(false);
@@ -912,7 +912,7 @@ function ProductsConfigSection() {
                   </p>
                 </div>
               ) : (
-                <ScrollArea className="flex-1 min-h-0 **:data-radix-scroll-area-thumb:hidden pr-3">
+                <ScrollArea className="flex-1 min-h-0">
                   <ul className="space-y-2">
                     {categories.map((cat) => (
                       <li
@@ -967,7 +967,7 @@ function ProductsConfigSection() {
                   </p>
                 </div>
               ) : (
-                <ScrollArea className="flex-1 min-h-0 **:data-radix-scroll-area-thumb:hidden pr-3">
+                <ScrollArea className="flex-1 min-h-0">
                   <ul className="space-y-2">
                     {units.map((u) => (
                       <li

@@ -315,7 +315,7 @@ export default function NovaVenda() {
         </div>
       ) : (
         <div className="max-h-[50vh] flex-1">
-          <ScrollArea className="h-full **:data-radix-scroll-area-thumb:hidden pr-4">
+          <ScrollArea className="h-full">
             <div className="space-y-2 p-0.5 pb-4">
               {items.map((it) => (
                 <Card key={it.productId} className="border-border/70">
@@ -429,7 +429,7 @@ export default function NovaVenda() {
 
             <div className="flex min-h-0 flex-1 flex-col px-4 pb-6 md:px-6 overflow-hidden">
               <div className="flex-1 min-h-0 overflow-hidden">
-                <ScrollArea className="h-full **:data-radix-scroll-area-thumb:hidden pr-4">
+                <ScrollArea className="h-full">
                   <div className="pb-4">
                     <div className="mb-3 shrink-0 rounded-xl border border-border bg-card p-3 text-sm">
                       <div className="font-medium">{client?.name}</div>
@@ -577,7 +577,7 @@ export default function NovaVenda() {
               </div>
 
               <div className="min-h-0 flex-1 mb-3">
-                <ScrollArea className="max-h-[25vh] **:data-radix-scroll-area-thumb:hidden pr-2">
+                <ScrollArea className="max-h-[25vh]">
                   <div className="space-y-1 pr-2">
                     {items.map((it) => (
                       <div

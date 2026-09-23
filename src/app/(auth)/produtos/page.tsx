@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/drawer";
 import {
   AlertDialog,
-  AlertDialogAction,
+  
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
@@ -46,7 +46,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Category } from "@/prisma/client";
-import { Loader2, ScanBarcode, Wand2, AlertCircle } from "lucide-react";
+import {  ScanBarcode, Wand2, AlertCircle } from "lucide-react";
 import { usePermissions } from "@/components/auth/permissions-provider";
 import { BarcodeScanner } from "@/components/barcode-scanner";
 
@@ -322,20 +322,7 @@ function StockEntry({
   onSuccess: (product: ProductFrontend) => void;
 }) {
   const [qty, setQty] = useState(1);
-  const [rawQty, setRawQty] = useState("1");
   const [busy, setBusy] = useState(false);
-
-  const handleQtyChange = (value: string) => {
-    // Remove zeros iniciais (ex: "01" → "1")
-    const cleaned = value.replace(/^0+(\d)/, "$1");
-    setRawQty(cleaned);
-    const num = parseInt(cleaned, 10);
-    if (!isNaN(num) && num > 0) {
-      setQty(num);
-    } else {
-      setQty(0);
-    }
-  };
 
   return (
     <Dialog open={!!product} onOpenChange={(open) => !open && onClose()}>
@@ -391,7 +378,6 @@ function StockEntry({
                 toast.success(`+${qty} un adicionados`);
 
                 setQty(1);
-                setRawQty("1");
                 onClose();
               } catch (error) {
                 const message =
@@ -497,7 +483,7 @@ function ProductForm({
               stock: parsed.stock === 0 ? "" : String(parsed.stock),
               minStock: parsed.minStock === 0 ? "" : String(parsed.minStock),
             });
-          } catch (e) {
+          } catch {
             setForm(initial);
           }
         } else {
@@ -604,7 +590,7 @@ function ProductForm({
             image: !prev.image && data.product.image_url ? data.product.image_url : prev.image,
           }));
         }
-      } catch (error) {
+      } catch {
         // Se a API externa falhar, não atrapalha o usuário
       }
     }
@@ -846,7 +832,7 @@ function ProductForm({
 
             <div className="flex min-h-0 flex-1 flex-col px-4 pb-6 overflow-hidden">
               <div className="flex-1 min-h-0 overflow-hidden">
-                <ScrollArea className="h-full **:data-radix-scroll-area-thumb:hidden pr-4">
+                <ScrollArea className="h-full">
                   <div className="pb-4">{FormFields}</div>
                 </ScrollArea>
               </div>

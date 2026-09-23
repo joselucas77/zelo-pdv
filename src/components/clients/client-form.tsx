@@ -179,7 +179,7 @@ export function ClientForm({
         if (draft) {
           try {
             setForm(JSON.parse(draft));
-          } catch (e) {
+          } catch {
             setForm(getInitialState());
           }
         } else {
@@ -431,7 +431,7 @@ export function ClientForm({
           </DrawerHeader>
           <div className="flex min-h-0 flex-1 flex-col px-4 pb-6 overflow-hidden">
             <div className="flex-1 min-h-0 overflow-hidden">
-              <ScrollArea className="h-full **:data-radix-scroll-area-thumb:hidden pr-4">
+              <ScrollArea className="h-full">
                 <div className="pb-4">{FormFields}</div>
               </ScrollArea>
             </div>

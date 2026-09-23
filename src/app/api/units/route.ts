@@ -14,7 +14,7 @@ export async function GET() {
     });
 
     return NextResponse.json(units);
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: "Erro interno do servidor" },
       { status: 500 },

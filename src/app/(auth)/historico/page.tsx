@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Receipt, Loader2, AlertTriangle } from "lucide-react";
+import { Receipt, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import {
   Dialog,

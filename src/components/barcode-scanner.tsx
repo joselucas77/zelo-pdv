@@ -62,12 +62,12 @@ export function BarcodeScanner({
             }
           }
         },
-        (errorMessage) => {
+        (_errorMessage) => {
           // Ignore parsing errors as they fire constantly when no code is present
         },
       );
       setIsScanning(true);
-    } catch (err) {
+    } catch {
       setError("Nenhuma câmera traseira encontrada ou permissão negada.");
       setIsScanning(false);
     }
@@ -92,6 +92,7 @@ export function BarcodeScanner({
     } else {
       stopScan();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
   // Cleanup on unmount
