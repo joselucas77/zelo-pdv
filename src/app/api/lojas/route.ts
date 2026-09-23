@@ -60,6 +60,12 @@ export async function POST(request: Request) {
               ]
             }
           }
+        },
+        clients: {
+          create: {
+            name: "Ao consumidor",
+            phone: ""
+          }
         }
       },
     });

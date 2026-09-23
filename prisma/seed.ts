@@ -17,6 +17,20 @@ async function main() {
 
   console.log(`Loja configurada: ${loja.name} (${loja.id})`);
 
+  // Cliente padrão
+  const existingClient = await prisma.client.findFirst({
+    where: { lojaId: loja.id, name: "Ao consumidor" }
+  });
+  if (!existingClient) {
+    await prisma.client.create({
+      data: {
+        lojaId: loja.id,
+        name: "Ao consumidor",
+        phone: ""
+      }
+    });
+  }
+
   // 2. Criar ou atualizar o grupo ADMIN para a loja
   const adminGroup = await prisma.accessGroup.upsert({
     where: {
@@ -140,6 +154,20 @@ async function main() {
   });
 
   console.log(`Loja Demo configurada: ${demoLoja.name} (${demoLoja.id})`);
+
+  // Cliente padrão demo
+  const existingDemoClient = await prisma.client.findFirst({
+    where: { lojaId: demoLoja.id, name: "Ao consumidor" }
+  });
+  if (!existingDemoClient) {
+    await prisma.client.create({
+      data: {
+        lojaId: demoLoja.id,
+        name: "Ao consumidor",
+        phone: ""
+      }
+    });
+  }
 
   // 2. Criar ou atualizar o grupo ADMIN para a Loja Demo
   const demoAdminGroup = await prisma.accessGroup.upsert({
