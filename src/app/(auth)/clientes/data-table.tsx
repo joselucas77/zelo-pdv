@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import {
   type ColumnDef,
+  type ColumnFiltersState,
   type SortingState,
   flexRender,
   getCoreRowModel,
@@ -11,7 +12,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { ChevronLeft, ChevronRight, Plus, Search } from "lucide-react";
+import { ChevronLeft, ChevronRight, ListFilter, Plus, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -23,6 +24,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import type { ClientTableData } from "./columns";
 
 export function ClientsDataTable({
@@ -37,14 +43,17 @@ export function ClientsDataTable({
   canAdd?: boolean;
 }) {
   const [globalFilter, setGlobalFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState("Todos");
   const [sorting, setSorting] = useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
   const table = useReactTable({
     data,
     columns,
-    state: { sorting, globalFilter },
+    state: { sorting, globalFilter, columnFilters },
     onSortingChange: setSorting,
     onGlobalFilterChange: setGlobalFilter,
+    onColumnFiltersChange: setColumnFilters,
     globalFilterFn: (row, _id, value) => {
       const term = String(value).trim().toLowerCase();
       if (!term) return true;
@@ -62,8 +71,14 @@ export function ClientsDataTable({
   });
 
   useEffect(() => {
+    table
+      .getColumn("pendingAmount")
+      ?.setFilterValue(statusFilter === "Todos" ? undefined : statusFilter);
+  }, [statusFilter, table]);
+
+  useEffect(() => {
     table.setPageIndex(0);
-  }, [globalFilter, table]);
+  }, [globalFilter, statusFilter, table]);
 
   const rows = table.getRowModel().rows;
   const totalFiltered = table.getFilteredRowModel().rows.length;
@@ -72,23 +87,79 @@ export function ClientsDataTable({
 
   return (
     <div>
-      <div className="mb-4 flex flex-col sm:justify-between gap-2 sm:flex-row sm:items-center">
-        <div className="relative flex-1 w-full">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            placeholder="Buscar por nome, telefone..."
-            value={globalFilter}
-            onChange={(e) => setGlobalFilter(e.target.value)}
-            autoComplete="new-password"
-            name="search-table"
-            id="search-table"
-            className="rounded-xl pl-9"
-          />
+      <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center w-full">
+        <div className="flex items-center gap-2 w-full">
+          <div className="relative flex-1 min-w-0">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder="Buscar por nome, telefone..."
+              value={globalFilter}
+              onChange={(e) => setGlobalFilter(e.target.value)}
+              autoComplete="new-password"
+              name="search-table"
+              id="search-table"
+              className="rounded-xl pl-9"
+            />
+          </div>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant={statusFilter !== "Todos" ? "default" : "outline"}
+                size="icon"
+                className="rounded-xl shrink-0"
+                aria-label="Filtrar"
+              >
+                <ListFilter className="h-4 w-4" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent align="end" className="w-48 p-1">
+              <div className="flex flex-col gap-0.5">
+                <Button
+                  variant={statusFilter === "Todos" ? "secondary" : "ghost"}
+                  size="sm"
+                  className="justify-start h-8"
+                  onClick={() => setStatusFilter("Todos")}
+                >
+                  Todos os clientes
+                </Button>
+                <Button
+                  variant={statusFilter === "Pendentes" ? "secondary" : "ghost"}
+                  size="sm"
+                  className="justify-start h-8"
+                  onClick={() => setStatusFilter("Pendentes")}
+                >
+                  Com pendências
+                </Button>
+                <Button
+                  variant={statusFilter === "Pagos" ? "secondary" : "ghost"}
+                  size="sm"
+                  className="justify-start h-8"
+                  onClick={() => setStatusFilter("Pagos")}
+                >
+                  Sem pendências
+                </Button>
+              </div>
+            </PopoverContent>
+          </Popover>
         </div>
+
         {canAdd !== false && (
-          <Button onClick={onCreateClick} size="sm" className="rounded-full">
-            <Plus className="mr-1 h-4 w-4" /> Adicionar
-          </Button>
+          <>
+            <Button
+              onClick={onCreateClick}
+              size="lg"
+              className="w-full rounded-full sm:hidden"
+            >
+              <Plus className="mr-2 h-4 w-4" /> Adicionar
+            </Button>
+            <Button
+              onClick={onCreateClick}
+              size="sm"
+              className="rounded-full hidden sm:flex shrink-0"
+            >
+              <Plus className="mr-1 h-4 w-4" /> Adicionar
+            </Button>
+          </>
         )}
       </div>
 

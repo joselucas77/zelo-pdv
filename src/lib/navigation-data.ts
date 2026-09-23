@@ -55,7 +55,7 @@ export const SECONDARY_NAV: NavItem[] = [
 ];
 
 export const TitlePages: TitlePage[] = [
-  { label: "Dashboard", to: "/" },
+  { label: "Dashboard", to: "/dashboard" },
   { label: "Produtos", to: "/produtos" },
   { label: "Nova Venda", to: "/nova-venda" },
   { label: "Clientes", to: "/clientes" },

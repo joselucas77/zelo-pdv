@@ -10,7 +10,7 @@ import {
   getPaginationRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { ChevronLeft, ChevronRight, Search } from "lucide-react";
+import { ChevronLeft, ChevronRight, Search, ListFilter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -22,6 +22,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import {
   Select,
   SelectContent,
@@ -77,26 +82,59 @@ export function SalesDataTable({
 
   return (
     <div>
-      <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center">
-        <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            placeholder="Buscar por cliente..."
-            value={globalFilter}
-            onChange={(e) => setGlobalFilter(e.target.value)}
-            className="rounded-xl pl-9"
-          />
+      <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center w-full">
+        <div className="flex items-center gap-2 w-full">
+          <div className="relative flex-1 min-w-0">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder="Buscar por cliente..."
+              value={globalFilter}
+              onChange={(e) => setGlobalFilter(e.target.value)}
+              className="rounded-xl pl-9"
+            />
+          </div>
+
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant={statusFilter !== "Todas" ? "default" : "outline"}
+                size="icon"
+                className="rounded-xl shrink-0"
+                aria-label="Filtrar status"
+              >
+                <ListFilter className="h-4 w-4" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent align="end" className="w-48 p-1">
+              <div className="flex flex-col gap-0.5">
+                <Button
+                  variant={statusFilter === "Todas" ? "secondary" : "ghost"}
+                  size="sm"
+                  className="justify-start h-8"
+                  onClick={() => setStatusFilter("Todas")}
+                >
+                  Todas as vendas
+                </Button>
+                <Button
+                  variant={statusFilter === "paid" ? "secondary" : "ghost"}
+                  size="sm"
+                  className="justify-start h-8"
+                  onClick={() => setStatusFilter("paid")}
+                >
+                  Pagas
+                </Button>
+                <Button
+                  variant={statusFilter === "pending" ? "secondary" : "ghost"}
+                  size="sm"
+                  className="justify-start h-8"
+                  onClick={() => setStatusFilter("pending")}
+                >
+                  Pendentes
+                </Button>
+              </div>
+            </PopoverContent>
+          </Popover>
         </div>
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-full rounded-xl sm:w-44">
-            <SelectValue placeholder="Filtrar status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="Todas">Todas</SelectItem>
-            <SelectItem value="paid">Pagas</SelectItem>
-            <SelectItem value="pending">Pendentes</SelectItem>
-          </SelectContent>
-        </Select>
       </div>
 
       <Card className="border-border/70 p-0">

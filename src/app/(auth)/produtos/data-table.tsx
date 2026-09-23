@@ -156,7 +156,7 @@ export function ProductsDataTable({
           size="lg"
           className="w-full rounded-full sm:hidden"
         >
-          <Plus className="mr-2 h-4 w-4" /> Adicionar novo produto
+          <Plus className="mr-2 h-4 w-4" /> Adicionar
         </Button>
         <Button
           onClick={onCreateClick}

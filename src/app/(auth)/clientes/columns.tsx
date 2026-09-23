@@ -73,6 +73,12 @@ export function getClientColumns({
     {
       accessorKey: "pendingAmount",
       header: () => <div className="text-right">Pendente</div>,
+      filterFn: (row, id, value) => {
+        const val = row.getValue(id) as number;
+        if (value === "Pendentes") return val > 0;
+        if (value === "Pagos") return val === 0;
+        return true;
+      },
       cell: ({ row }) => {
         const val = row.original.pendingAmount;
         return (
