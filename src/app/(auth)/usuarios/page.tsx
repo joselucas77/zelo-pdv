@@ -181,16 +181,7 @@ export default function UsuariosPage() {
   }
 
   return (
-    <div className="flex-1 space-y-4 px-4 w-full">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight">Usuários</h2>
-          <p className="text-muted-foreground">
-            Gerencie os acessos ao sistema.
-          </p>
-        </div>
-      </div>
-
+    <div className="px-4 w-full">
       <UsersDataTable
         columns={columns}
         data={enrichedUsers}

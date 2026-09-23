@@ -96,7 +96,7 @@ export default function ClientesPage() {
   }
 
   return (
-    <div className="w-full px-4 py-6">
+    <div className="w-full px-4">
       <ClientsDataTable
         columns={columns}
         data={enrichedClients}

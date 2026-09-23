@@ -108,7 +108,7 @@ export default function HistoricoPage() {
   }
 
   return (
-    <div className="w-full px-4 py-6">
+    <div className="w-full px-4">
       <SalesDataTable columns={columns} data={sortedSales} />
 
       {/* Modal de Detalhes da Venda */}
