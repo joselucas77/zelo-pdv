@@ -125,7 +125,7 @@ export function SaleVoucher({ sale, open, onClose, clientPhone }: Props) {
     try {
       setBusy("pdf");
       const url = await render();
-      const img = new Image();
+      const img = new window.Image();
       img.src = url;
       await new Promise((res, rej) => {
         img.onload = res;
