@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { BadgeCheck, Download, FileText, Share2 } from "lucide-react";
+import { Download, FileText, Share2 } from "lucide-react";
 import { toast } from "sonner";
 import { toPng } from "html-to-image";
 import { Button } from "@/components/ui/button";
+import Image from "next/image";
 import {
   Dialog,
   DialogContent,
@@ -180,107 +181,101 @@ export function SaleVoucher({ sale, open, onClose, clientPhone }: Props) {
   const VoucherDesign = sale ? (
     <div
       ref={ref}
-      className="mx-auto w-full max-w-md rounded-2xl border border-slate-200 bg-white text-slate-900 overflow-hidden"
-      style={{ padding: "24px" }}
+      className="mx-auto w-full max-w-md bg-white text-slate-900 overflow-hidden font-mono text-[13px] leading-tight"
+      style={{ padding: "24px", boxShadow: "0 0 10px rgba(0,0,0,0.05)" }}
     >
       <div className="flex flex-col items-center text-center">
-        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-slate-900 text-white shadow-sm">
-          <BadgeCheck className="h-7 w-7" />
+        <Image 
+          src="/zelo.jpeg" 
+          alt="Zelo Logo" 
+          width={56} 
+          height={56} 
+          className="rounded-lg object-contain mb-3 grayscale"
+        />
+        
+        <div className="font-bold uppercase text-sm">
+          {store.name}
         </div>
-        {/* <div className="mt-3 text-lg font-bold text-slate-900">{store.name}</div> */}
         {voucher.resellerName && (
-          <div className="text-sm font-medium text-slate-500">
+          <div className="uppercase">
             {voucher.resellerName}
           </div>
         )}
-        <h2 className="mt-4 text-3xl font-bold tracking-tight text-slate-900">
-          Obrigado!
-        </h2>
-        <p className="mt-1.5 text-xs font-bold uppercase tracking-widest text-slate-400">
-          Pedido confirmado
-        </p>
-      </div>
+        {voucher.showContact && (
+          <div className="uppercase mt-1 text-xs">
+            {store.address && <div>{store.address}</div>}
+            {store.phone && <div>TEL: {store.phone}</div>}
+            {store.email && <div>{store.email}</div>}
+          </div>
+        )}
 
-      <div className="my-6 border-t-2 border-dashed border-slate-200" />
-
-      <div className="text-center">
-        <div className="text-sm font-medium text-slate-500">Comprovante de compra de</div>
-        <div className="mt-1 text-xl font-bold text-slate-800">{sale.clientName}</div>
-        <div className="mt-3 inline-flex rounded-lg bg-slate-100 px-4 py-1.5 text-sm font-bold tracking-widest text-slate-700">
-          PEDIDO #{code}
+        <div className="mt-4 mb-2 font-bold text-base tracking-widest uppercase border-y border-dashed border-slate-400 py-1 w-full">
+          CUPOM NÃO FISCAL
         </div>
       </div>
 
-      <div className="mt-6">
-        <div className="mb-3 text-xs font-bold uppercase tracking-widest text-slate-400 text-center">
-          Resumo da Compra
+      <div className="text-left mt-2 space-y-1">
+        <div className="uppercase">DATA: {dateTime(sale.date)}</div>
+        <div className="uppercase">PEDIDO: #{code}</div>
+        <div className="uppercase">CLIENTE: {sale.clientName}</div>
+      </div>
+
+      <div className="my-3 border-t border-dashed border-slate-400" />
+
+      <div className="mt-2">
+        <div className="mb-2 font-bold uppercase flex justify-between">
+          <span>ITEM</span>
+          <span>VALOR</span>
         </div>
         <div className="space-y-2">
           {sale.items.map((it) => (
-            <div
-              key={it.productId}
-              className="flex items-start justify-between gap-4 rounded-xl bg-slate-50 px-4 py-3 text-sm border border-slate-100"
-            >
-              <span className="min-w-0 flex-1 font-medium text-slate-700">
-                <span className="tabular-nums text-slate-400 font-bold mr-1">
-                  {it.quantity}×
-                </span>
-                {it.productName}
-              </span>
-              <span className="font-bold tabular-nums text-slate-900">
-                {currency(it.unitPrice * it.quantity)}
-              </span>
+            <div key={it.productId} className="flex flex-col">
+              <span className="uppercase">{it.productName}</span>
+              <div className="flex justify-between w-full">
+                <span>{it.quantity} UN X {currency(it.unitPrice)}</span>
+                <span>{currency(it.unitPrice * it.quantity)}</span>
+              </div>
             </div>
           ))}
         </div>
       </div>
 
-      <div className="mt-6 space-y-3 text-sm">
-        <div className="flex items-center justify-between px-1">
-          <span className="font-medium text-slate-500">Pagamento</span>
-          <span className="font-bold text-slate-800">{PAYMENT_LABELS[sale.paymentMethod]}</span>
+      <div className="my-3 border-t border-dashed border-slate-400" />
+
+      <div className="mt-2 space-y-1">
+        <div className="flex items-center justify-between font-bold text-base">
+          <span className="uppercase">TOTAL</span>
+          <span>{currency(sale.total)}</span>
         </div>
-        <div className="flex items-center justify-between px-1">
-          <span className="font-medium text-slate-500">Situação</span>
-          <span className={`font-bold ${sale.status === "PAGO" ? "text-slate-900" : "text-slate-500"}`}>
-            {sale.status === "PAGO" ? "Pago" : "Pendente"}
-          </span>
+        <div className="flex items-center justify-between mt-2">
+          <span className="uppercase">PAGAMENTO</span>
+          <span className="uppercase">{PAYMENT_LABELS[sale.paymentMethod]}</span>
+        </div>
+        <div className="flex items-center justify-between">
+          <span className="uppercase">SITUAÇÃO</span>
+          <span className="uppercase">{sale.status === "PAGO" ? "PAGO" : "PENDENTE"}</span>
         </div>
         {sale.dueDate && (
-          <div className="flex items-center justify-between px-1">
-            <span className="font-medium text-slate-500">Vencimento</span>
-            <span className="font-bold text-slate-800">{new Date(sale.dueDate).toLocaleDateString("pt-BR")}</span>
+          <div className="flex items-center justify-between">
+            <span className="uppercase">VENCIMENTO</span>
+            <span>{new Date(sale.dueDate).toLocaleDateString("pt-BR")}</span>
           </div>
         )}
-        <div className="flex items-center justify-between rounded-xl bg-slate-900 px-4 py-3 mt-4 text-white shadow-sm">
-          <span className="text-base font-medium">Total</span>
-          <span className="text-xl font-bold tabular-nums">{currency(sale.total)}</span>
-        </div>
       </div>
 
       {sale.notes && (
-        <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm font-medium text-slate-700">
-          {sale.notes}
+        <div className="mt-4 p-2 border border-dashed border-slate-400 uppercase text-xs">
+          OBS: {sale.notes}
         </div>
       )}
 
-      <div className="my-6 border-t-2 border-dashed border-slate-200" />
+      <div className="my-4 border-t border-dashed border-slate-400" />
 
-      <div className="flex items-center justify-between px-1">
-        <div className="text-sm font-bold text-slate-800">{store.name}</div>
-        <div className="text-xs font-medium text-slate-500 tabular-nums">
-          {dateTime(sale.date)}
-        </div>
-      </div>
-      {voucher.showContact && (store.phone || store.email || store.address) && (
-        <div className="mt-2 space-y-1 text-xs font-medium text-slate-500 px-1">
-          {store.phone && <div>{store.phone}</div>}
-          {store.email && <div>{store.email}</div>}
-          {store.address && <div>{store.address}</div>}
-        </div>
-      )}
-      <p className="mt-6 text-center text-[10px] font-bold uppercase tracking-widest text-slate-400">
-        {voucher.footerText || "Documento sem valor fiscal"}
+      <p className="mt-4 text-center text-xs uppercase font-bold">
+        {voucher.footerText || "OBRIGADO PELA PREFERÊNCIA"}
+      </p>
+      <p className="mt-1 text-center text-[10px] uppercase">
+        * DOCUMENTO SEM VALOR FISCAL *
       </p>
     </div>
   ) : null;
