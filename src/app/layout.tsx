@@ -15,7 +15,6 @@ export const metadata: Metadata = {
   title: "Zelo",
   description:
     "Sistema de controle de vendas e estoque para pequenos negócios.",
-  manifest: "/site.webmanifest?v=3",
   icons: {
     icon: "/favicon.ico?v=3",
     apple: "/apple-touch-icon.png?v=3",
